@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
+import util.dbUtils 
 
 app = Flask(__name__)
 
@@ -18,8 +19,12 @@ def login():
         pwd = request.form["pass"]
         #fxn to verify w SQL
         #if true: add session and redirect to home page
+        if util.dbUtils.loginAuth == True:
         #else return login page
-        
+            session["user"] = user
+            redirect(url_for("home"))
+        else:
+            return render_template("login.html", extra = "LOGIN INCORRECT")
 
 @app.route("/register", methods=["GET", "POST"])
 def reg():
@@ -30,7 +35,7 @@ def reg():
         pwd = request.form["pass"]
         #fxn to check if username !exists in SQL
         #if true: add the user to SQL, redirect to login
-        #else: refresh
+        redirect(url_for("login"))
         
 @app.route("/logout")
 def logout():
