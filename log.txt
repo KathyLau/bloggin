@@ -1,0 +1,4 @@
+11/1 class
+- Daniel: found frontend template to use and added support for jinja templating
+- Kelly: made initial app.py routes
+- Kathy: helped kelly and logged 
