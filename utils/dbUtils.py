@@ -1,5 +1,5 @@
-import sqllite3
-c = sqlite3.connect('../data/tabular.db')
+import sqlite3
+c = sqlite3.connect('data/tabular.db')
 
 def setup():
     q = '''
