@@ -33,9 +33,6 @@
 		<input type="text" name="query" placeholder="Search" />
 	      </form>
 	    </li>
-	    <li class="menu">
-	      <a class="fa-bars" href="#menu">Menu</a>
-	    </li>
 	  </ul>
 	</nav>
       </header>
@@ -92,6 +89,16 @@
 	  </header>
 	</section>
 
+	<!-- Account info -->
+	<section id="account-info">
+	  <header>
+	    <p>Logged in as: {{ username }}</p>
+	  </header>
+	  <div class="align-center">
+	    <a href="/logout" class="button">Log Out</a>
+	  </div>
+	</section>
+	
 	<!-- About -->
 	<section class="blurb">
 	  <h2>About</h2>
