@@ -1,4 +1,10 @@
 11/1 class
 - Daniel: found frontend template to use and added support for jinja templating
 - Kelly: made initial app.py routes
-- Kathy: helped kelly and logged 
+- Kathy: helped kelly and logged
+
+11/1 home
+- Daniel: Cut some stuff out of frontend templates to make login and register pages
+
+11/2 class
+- Daniel: Removed some more uneccesary stuff from webpage. 
