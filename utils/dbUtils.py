@@ -37,25 +37,53 @@ def setup():
 
 
 '''
-LOGIN: verifies login auth with db and returns corresponding int
+LOGINAUTH: verifies login creds with db and returns corresponding int
 > Input: STRING username, STRING password
 > Output:
   > 0 if all ok
-  > 1 if username doesn't exist
-  > 2 if username DOES exist but wrong password
+  > 1 if username empty
+  > 2 if password empty
+  > 3 if username doesn't exist
+  > 4 if username DOES exist but wrong password
 '''
-def login(username, password):
+def loginAuth(username, password):
+    if not username: #username empty
+        return 1
+    if not password: #password empty
+        return 2
     q = "SELECT 1 FROM user WHERE username=\"%s\" LIMIT 1;" % username
     userExists = c.execute(q).fetchone()
-
     if userExists:
         q = "SELECT 1 FROM user WHERE username=\"%s\" AND password=\"%s\" LIMIT 1;" % (username, password)
         correctPass = c.execute(q).fetchone()
-
         if correctPass:
             return 0
+        return 4
+    return 3
+
+
+'''
+REGISTERAUTH: verifies signup auth with db and returns corresponding int
+> Input: STRING username, STRING password, STRING password_repeat
+> Output:
+  > 0 if all ok
+  > 1 if username empty
+  > 2 if pass or rpass empty
+  > 3 if passwords don't match
+  > 4 if username already exists
+'''
+def registerAuth(username, password, password_repeat):
+    if not username:
+        return 1
+    if not password or not password_repeat:
         return 2
-    return 1
+    if password != password_repeat:
+        return 3
+    q = "SELECT 1 FROM user WHERE username=\"%s\" LIMIT 1;" % username
+    userExists = c.execute(q).fetchone()
+    if userExists:
+        return 4
+    return 0
 
 
 def tmp():
@@ -66,11 +94,14 @@ def tmp():
 
 
 def debug():
-    print login("cop","lek") #should be 2
-    print login("shop","kek") #should be 1
-    print login("top","kek") #should be 0
-    print login("cop","tech") #should be 0
+    print loginAuth("cop","lek") #should be 4
+    print loginAuth("shop","kek") #should be 3
+    print loginAuth("cop","") #should be 2
+    print loginAuth("","tech") #should be 1
+    print loginAuth("top","kek") #should be 0
+    print loginAuth("cop","tech") #should be 0
 
+setup()
 debug()
 conn.commit()
 conn.close()
