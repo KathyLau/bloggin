@@ -7,4 +7,7 @@
 - Daniel: Cut some stuff out of frontend templates to make login and register pages
 
 11/2 class
-- Daniel: Removed some more uneccesary stuff from webpage. 
+- Daniel: Removed some more unneccesary stuff from webpage. 
+
+11/2 home
+- William: integrated table gen (init sequence) of db in utils/dbUtils.py
