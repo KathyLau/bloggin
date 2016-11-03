@@ -19,7 +19,7 @@ def login():
         pwd = request.form["pass"]
         #fxn to verify w SQL
         #if true: add session and redirect to home page
-        if util.dbUtils.loginAuth == True:
+        if utils.dbUtils.loginAuth == True:
         #else return login page
             session["user"] = user
             redirect(url_for("home"))
