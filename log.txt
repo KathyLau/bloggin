@@ -11,3 +11,5 @@
 
 11/2 home
 - William: integrated table gen (init sequence) of db in utils/dbUtils.py
+- William: added .gitignore for py/emacs
+- William: finished login (and verified fxnality) in dbUtils
