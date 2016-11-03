@@ -7,7 +7,7 @@ app = Flask(__name__)
 def home():
 
     #So i know i'm doing front-end but I just made an example of how the jinja template parses articles at the moment. This is my idea for now
-    posts = [{'title':'Dogs', 'subtitle':'An exploration into the canine psyche', 'author':'DanWasHere', 'content':'Indeed we all know dogs are rather friendly. But are they intelligent? Often the question is raised in academic circles if dogs could perhaps have more insight into what is going on around them than their slobbery smiling faces would indicate to the untrained eye'}]
+    posts = [{'title':'Dogs', 'subtitle':'An exploration into the canine psyche', 'author':'DanWasHere', 'content':'Indeed we all know dogs are rather friendly. But are they intelligent? Often the question is raised in academic circles if dogs could perhaps have more insight into what is going on around them than their slobbery smiling faces would indicate to the untrained eye'}, {'title':'Why Kelly', 'subtitle':"Damn it Kelly show up for school", "author":"DanWasHere", "content":"Dear Kelly, Show up for school, we miss you and your stuff is broken. Sincerely, Daniel"}]
     return render_template("index.html", postlist=posts, username="dogblogger")
 
 @app.route("/login", methods=["GET", "POST"])
