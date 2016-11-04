@@ -1,0 +1,135 @@
+<!DOCTYPE HTML>
+
+<html>
+  <head>
+    <title>Storytime Fun Site</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--[if lte IE 8]><script src="static/js/ie/html5shiv.js"></script><![endif]-->
+    <link rel="stylesheet" href="static/css/main.css" />
+    <!--[if lte IE 9]><link rel="stylesheet" href="static/css/ie9.css" /><![endif]-->
+    <!--[if lte IE 8]><link rel="stylesheet" href="static/css/ie8.css" /><![endif]-->
+  </head>
+  <body>
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+      <!-- Header -->
+      <header id="header">
+	<h1><a href="/">Story Builder</a></h1>
+	<nav class="links">
+	  <ul>
+	    <li><a href="/">Your Stories</a></li>
+	    <li><a href="#">Find Stories</a></li>
+	    <li><a href="/new">Create Story</a></li>
+	  </ul>
+	</nav>
+	<nav class="main">
+	  <ul>
+	    <li class="search">
+	      <a class="fa-search" href="#search">Search</a>
+	      <form id="search" method="get" action="#">
+		<input type="text" name="query" placeholder="Search" />
+	      </form>
+	    </li>
+	  </ul>
+	</nav>
+      </header>
+
+      <!-- Main -->
+      <div id="main">
+
+	{% for post in postlist %}
+	<!-- Post -->
+	<article class="post">
+	  <header>
+	    <div class="title">
+	      <h2><a href="#">{{ post[ 'title' ] }}</a></h2>
+	      <p>{{ post[ 'subtitle' ] }}</p>
+	    </div>
+	    <div class="meta">
+	      <time class="published" datetime="2015-11-01">November 1, 2015</time>
+	      <a href="#" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src="static/images/avatar.jpg" alt="" /></a>
+	    </div>
+	  </header>
+	  <a href="#" class="image featured"><img src="static/images/pic01.jpg" alt="" /></a>
+	  <p>{{ post [ 'content' ] }}</p>
+	  <footer>
+	    <ul class="actions">
+	      <li><a href="#" class="button big">Continue Reading</a></li>
+	    </ul>
+	    <ul class="stats">
+	      <li><a href="#">General</a></li>
+	      <li><a href="#" class="icon fa-heart">28</a></li>
+	      <li><a href="#" class="icon fa-comment">128</a></li>
+	    </ul>
+	  </footer>
+	</article>
+
+	{% endfor %}
+
+	<!-- Pagination -->
+	<ul class="actions pagination">
+	  <li><a href="" class="disabled button big previous">Previous Page</a></li>
+	  <li><a href="#" class="button big next">Next Page</a></li>
+	</ul>
+
+      </div>
+
+      <!-- Sidebar -->
+      <section id="sidebar">
+
+	<!-- Intro -->
+	<section id="intro">
+	  <a href="#" class="logo"><img src="static/images/logo.jpg" alt="" /></a>
+	  <header>
+	    <h2>Storytime Fun Site</h2>
+	    <p>Write and share stories with your friends in real-time!</p>
+	  </header>
+	</section>
+
+	<!-- Account info -->
+	<section>
+	  <header class="bold" id="account-info">
+	    <p>Logged in as: <a href="/account">{{ username }}</a></p>
+	  </header>
+	  <div class="align-center">
+	    <a href="/logout" class="button">Log Out</a>
+	  </div>
+	</section>
+	
+	<!-- About -->
+	<section class="blurb">
+	  <h2>About</h2>
+	  <p>Story Builder is a site in which users can create and share stories with the world. It is designed to allow creative writers to go forth and share their ideas and to build interesting, funny or quirky stories with people on the web.</p>
+	  <ul class="actions">
+	    <li><a href="/about" class="button">Learn More</a></li>
+	  </ul>
+	</section>
+
+	<!-- Footer -->
+	<section id="footer">
+	  <ul class="icons">
+	    <li><a href="#" class="fa-twitter"><span class="label">Twitter</span></a></li>
+	    <li><a href="#" class="fa-facebook"><span class="label">Facebook</span></a></li>
+	    <li><a href="#" class="fa-instagram"><span class="label">Instagram</span></a></li>
+	    <li><a href="#" class="fa-rss"><span class="label">RSS</span></a></li>
+	    <li><a href="#" class="fa-envelope"><span class="label">Email</span></a></li>
+	  </ul>
+	  <p class="copyright">&copy; Untitled. Design: <a href="http://html5up.net">HTML5 UP</a>. Images: <a href="http://unsplash.com">Unsplash</a>.</p>
+	</section>
+
+      </section>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="static/js/jquery.min.js"></script>
+    <script src="static/js/skel.min.js"></script>
+    <script src="static/js/util.js"></script>
+    <!--[if lte IE 8]><script src="static/js/ie/respond.min.js"></script><![endif]-->
+    <script src="static/js/main.js"></script>
+
+  </body>
+</html>
