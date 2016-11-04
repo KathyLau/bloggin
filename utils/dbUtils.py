@@ -1,6 +1,6 @@
 import sqlite3
 from pprint import pprint
-conn = sqlite3.connect('tabular.db')
+conn = sqlite3.connect('tabular.db', check_same_thread=False)
 c = conn.cursor()
 
 def setup():
@@ -176,4 +176,4 @@ if __name__ == "__main__":
         tmp()
     debug()
 
-conn.close()
+
