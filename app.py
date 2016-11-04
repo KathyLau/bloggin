@@ -33,7 +33,8 @@ def reg():
     else:
         user = request.form["user"]
         pwd = request.form["pass"]
-        if utils.dbUtils.registerAuth(user, pwd) == True:
+        repeat = request.form["confirm"]
+        if utils.dbUtils.registerAuth(user, pwd, confirm) == True:
         #else return reg page
             session["user"] = user
             redirect(url_for("home"))
