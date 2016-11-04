@@ -37,6 +37,16 @@ def setup():
 
 
 '''
+USERINDB: tests if username exists in db file
+> Input: STRING username to query for
+> Output: True if username already in db, False otherwise
+'''
+def userInDB(username):
+    q = "SELECT 1 FROM user WHERE username=\"%s\" LIMIT 1;" % username
+    return True if c.execute(q).fetchone() else False
+
+
+'''
 LOGINAUTH: verifies login creds with db and returns corresponding int
 > Input: STRING username, STRING password
 > Output:
@@ -51,9 +61,7 @@ def loginAuth(username, password):
         return 1
     if not password: #password empty
         return 2
-    q = "SELECT 1 FROM user WHERE username=\"%s\" LIMIT 1;" % username
-    userExists = c.execute(q).fetchone()
-    if userExists:
+    if userInDB(username):
         q = "SELECT 1 FROM user WHERE username=\"%s\" AND password=\"%s\" LIMIT 1;" % (username, password)
         correctPass = c.execute(q).fetchone()
         if correctPass:
@@ -80,16 +88,30 @@ def registerAuth(username, password, password_repeat):
     if password != password_repeat:
         return 3
     q = "SELECT 1 FROM user WHERE username=\"%s\" LIMIT 1;" % username
-    userExists = c.execute(q).fetchone()
-    if userExists:
+    if userInDB(username):
         return 4
     return 0
 
+
+'''
+ADDUSER: Adds user to db
+> Input: STRING username, STRING password_hashed
+'''
+def addUser(username, password_hashed):
+    assert not userInDB(username), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
+    q = "INSERT INTO user(username, password) VALUES(\"%s\",\"%s\")" % (username, password_hashed)
+    c.execute(q)
+    conn.commit()
+
+'''
+GETTABLES: temp fxn to check if tables created already
+> Output: list of table names IF cursor exists, None otherwise
+'''
 def getTables():
     if c != None:
         c.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        stringtable = map((lambda table: str(table[0])), c.fetchall())
-        return stringtable
+        list_tableName = map((lambda table: str(table[0])), c.fetchall())
+        return list_tableName
     return None
 
 
@@ -98,6 +120,7 @@ def tmp():
     c.execute(q);
     q = "INSERT INTO user(username, password) VALUES(\"cop\",\"tech\");"
     c.execute(q);
+    conn.commit()
 
 def debug():
     #exists: [top: kek], [cop, tech]
@@ -118,6 +141,17 @@ def debug():
     print registerAuth("", "nop", "nop") #should be 1
     print registerAuth("pot", "kek", "kek") #should be 0
     print registerAuth("shop", "tech", "tech") #should be 0
+    
+    print "\nTESTING ADDUSER..."
+    addUser("smol", "bloggos")
+    addUser("bloggos", "smol")
+    addUser("yawk", "kek")
+    try:
+        addUser("top", "asdf") #should throw error
+    except:
+        print "Threw user already found error!"
+    print "Adding fetchUsers fxn later lmao"
+    
 
 if __name__ == "__main__":
     if 'user' not in getTables():
@@ -125,5 +159,4 @@ if __name__ == "__main__":
         tmp()
     debug()
 
-conn.commit()
 conn.close()
