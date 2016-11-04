@@ -8,7 +8,7 @@ def setup():
     id INTEGER PRIMARY KEY,
     username VARCHAR(50) UNIQUE,
     password VARCHAR(50)
-    )
+    );
     '''
     c.execute(q)
 
@@ -20,7 +20,7 @@ def setup():
     subtitle TEXT,
     preContent TEXT,
     create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    )
+    );
     '''
     c.execute(q)
 
@@ -31,7 +31,7 @@ def setup():
     story_id INT NOT NULL,
     extContent TEXT,
     create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    )
+    );
     '''
     c.execute(q)
 
@@ -85,23 +85,23 @@ def registerAuth(username, password, password_repeat):
         return 4
     return 0
 
-
-def tmp():
-    q = "INSERT INTO user(username, password) VALUES(\"top\",\"kek\")"
-    c.execute(q);
-    q = "INSERT INTO user(username, password) VALUES(\"cop\",\"tech\")"
-    c.execute(q);
-
-
-def tables():
+def getTables():
     if c != None:
         c.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        stringtable = []
-        for table in c.fetchall():
-            stringtable.append(str(table[0]))
-            return stringtable
-        
+        stringtable = map((lambda table: str(table[0])), c.fetchall())
+        return stringtable
+    return None
+
+
+def tmp():
+    q = "INSERT INTO user(username, password) VALUES(\"top\",\"kek\");"
+    c.execute(q);
+    q = "INSERT INTO user(username, password) VALUES(\"cop\",\"tech\");"
+    c.execute(q);
+
 def debug():
+    #exists: [top: kek], [cop, tech]
+    print "\nTESTING LOGIN..."
     print loginAuth("cop","lek") #should be 4
     print loginAuth("shop","kek") #should be 3
     print loginAuth("cop","") #should be 2
@@ -109,9 +109,21 @@ def debug():
     print loginAuth("top","kek") #should be 0
     print loginAuth("cop","tech") #should be 0
 
-demtables = tables()
-if "user" not in demtables and "story" not in demtables and "extension" not in demtables:
-    setup()
-debug()
+    print "\nTESTING REGISTER..."
+    print registerAuth("cop", "mop", "mop") #should be 4
+    print registerAuth("top", "kek", "kek") #should be 4
+    print registerAuth("shop", "lop", "mop") #should be 3
+    print registerAuth("stop", "", "") #should be 2
+    print registerAuth("stop", "abc", "") #should be 2
+    print registerAuth("", "nop", "nop") #should be 1
+    print registerAuth("pot", "kek", "kek") #should be 0
+    print registerAuth("shop", "tech", "tech") #should be 0
+
+if __name__ == "__main__":
+    if 'user' not in getTables():
+        setup()
+        tmp()
+    debug()
+
 conn.commit()
 conn.close()
