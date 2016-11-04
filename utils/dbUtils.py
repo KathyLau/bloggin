@@ -1,4 +1,5 @@
 import sqlite3
+from pprint import pprint
 conn = sqlite3.connect('tabular.db')
 c = conn.cursor()
 
@@ -109,11 +110,22 @@ GETTABLES: temp fxn to check if tables created already
 '''
 def getTables():
     if c != None:
-        c.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        q = "SELECT name FROM sqlite_master WHERE type='table';"
+        c.execute(q)
         list_tableName = map((lambda table: str(table[0])), c.fetchall())
         return list_tableName
     return None
 
+'''
+PRINTTABLE: prints out table in DB in human-readable format
+> Input: STRING tableName
+'''
+def printTable(tableName):
+    q = "SELECT * FROM %s;" % tableName
+    tableData = c.execute(q).fetchall()
+    pprint(tableData)
+
+#TODO: check if user already commented on post
 
 def tmp():
     q = "INSERT INTO user(username, password) VALUES(\"top\",\"kek\");"
@@ -122,6 +134,7 @@ def tmp():
     c.execute(q);
     conn.commit()
 
+    
 def debug():
     #exists: [top: kek], [cop, tech]
     print "\nTESTING LOGIN..."
@@ -152,7 +165,11 @@ def debug():
         print "Threw user already found error!"
     print "Adding fetchUsers fxn later lmao"
     
-
+    print "\nPRINTING TABLES..."
+    printTable("user")
+    printTable("story")
+    printTable("extension")
+    
 if __name__ == "__main__":
     if 'user' not in getTables():
         setup()
