@@ -93,6 +93,14 @@ def tmp():
     c.execute(q);
 
 
+def tables():
+    if c != None:
+        c.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        stringtable = []
+        for table in c.fetchall():
+            stringtable.append(str(table[0]))
+            return stringtable
+        
 def debug():
     print loginAuth("cop","lek") #should be 4
     print loginAuth("shop","kek") #should be 3
@@ -101,7 +109,9 @@ def debug():
     print loginAuth("top","kek") #should be 0
     print loginAuth("cop","tech") #should be 0
 
-setup()
+demtables = tables()
+if "user" not in demtables and "story" not in demtables and "extension" not in demtables:
+    setup()
 debug()
 conn.commit()
 conn.close()
