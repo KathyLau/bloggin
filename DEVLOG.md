@@ -44,6 +44,7 @@
 
 
 ### 11/5 Home
+- Daniel: refactored jinja templates to use inheritance
 
 ===
 
