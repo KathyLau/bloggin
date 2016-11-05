@@ -54,5 +54,5 @@
 
 ===
 
-[ x ] test
-[   ] moretest
+- [ x ] test
+- [   ] moretest
