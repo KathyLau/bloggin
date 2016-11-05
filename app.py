@@ -5,13 +5,16 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    #So i know i'm doing front-end but I just made an example of how the jinja template parses articles at the moment. This is my idea for now
-    posts = [{'title':'Dogs', 'subtitle':'An exploration into the canine psyche', 'author':'DanWasHere', 'content':'Indeed we all know dogs are rather friendly. But are they intelligent? Often the question is raised in academic circles if dogs could perhaps have more insight into what is going on around them than their slobbery smiling faces would indicate to the untrained eye'}, {'title':'Why Kelly', 'subtitle':"Damn it Kelly show up for school", "author":"DanWasHere", "content":"Dear Kelly, Show up for school, we miss you and your stuff is broken. Sincerely, Daniel"}]
     if "user" in session:
-        return render_template("yourstories.html", postlist=posts, username=session["user"])
+        return redirect(url_for("yourstories"))
     else:
         return redirect(url_for("login"))
 
+@app.route("/yourstories")
+def yourstories():
+    posts = [{'title':'Dogs', 'subtitle':'An exploration into the canine psyche', 'author':'DanWasHere', 'content':'Indeed we all know dogs are rather friendly. But are they intelligent? Often the question is raised in academic circles if dogs could perhaps have more insight into what is going on around them than their slobbery smiling faces would indicate to the untrained eye'}, {'title':'Why Kelly', 'subtitle':"Damn it Kelly show up for school", "author":"DanWasHere", "content":"Dear Kelly, Show up for school, we miss you and your stuff is broken. Sincerely, Daniel"}]
+    return render_template("multipleposts.html", postlist=posts, username=session["user"])
+    
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method=="GET":
