@@ -18,7 +18,7 @@
 
 ===
 
-v### 11/2 Home
+### 11/2 Home
 - William: integrated table gen (init sequence) of db in utils/dbUtils.py
 - William: added .gitignore for py/emacs
 - William: finished login (and verified fxnality) in dbUtils
@@ -44,12 +44,15 @@ v### 11/2 Home
 
 
 ### 11/5 Home
+
 ===
 
 
 
 
 # STILL NEED TO DO
+
 ===
+
 [ x ] test
 [   ] moretest
