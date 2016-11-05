@@ -1,128 +1,33 @@
-<!DOCTYPE HTML>
+{% extends "sideandnavbar.html" %}
 
-<html>
-  <head>
-    <title>Storytime Fun Site</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!--[if lte IE 8]><script src="static/js/ie/html5shiv.js"></script><![endif]-->
-    <link rel="stylesheet" href="static/css/main.css" />
-    <!--[if lte IE 9]><link rel="stylesheet" href="static/css/ie9.css" /><![endif]-->
-    <!--[if lte IE 8]><link rel="stylesheet" href="static/css/ie8.css" /><![endif]-->
-  </head>
-  <body>
+{% block content %}
 
-    <!-- Wrapper -->
-    <div id="wrapper">
+<!-- Main -->
+<div id="main">
 
-      <!-- Header -->
-      <header id="header">
-	<h1><a href="/">Story Builder</a></h1>
-	<nav class="links">
-	  <ul>
-	    <li><a href="/">Your Stories</a></li>
-	    <li><a href="#">Find Stories</a></li>
-	    <li><a href="/new">Create Story</a></li>
-	  </ul>
-	</nav>
-	<nav class="main">
-	  <ul>
-	    <li class="search">
-	      <a class="fa-search" href="#search">Search</a>
-	      <form id="search" method="get" action="#">
-		<input type="text" name="query" placeholder="Search" />
-	      </form>
-	    </li>
-	    <div id="navmenu"></div>
-	  </ul>
-	</nav>
-      </header>
+  <!-- Post -->
+  <article class="post">
 
-      <!-- Menu on mobile -->
-      <div id="menudiv"></div>
-
-      <!-- Main -->
-      <div id="main">
-
-	<!-- Post -->
-	<article class="post">
-
-	  <header>
-	      <div class="title">
-		<h2>Create a Story</h2>
-	      </div>
-	  </header>
-	  <form method="POST" action="/new">
-	    <input type="text" name="title" placeholder="Title" style="padding-bottom: 2e;">
-	    <br>
-	    <input type="text" name="subtitle" placeholder="Sub-title" style="padding-bottom: 2e;">
-	    <br>
-	    <textarea name="post" style="padding-bottom: 2e"></textarea>
-	    <br>
-	  <footer>
-	    <ul class="actions">
-	      <li><input type="submit" name="submit" class="button big"></li>
-	    </ul>
-	  </footer>
-	  </form>
-	</article>
-
+    <header>
+      <div class="title">
+	<h2>Create a Story</h2>
       </div>
+    </header>
+    <form method="POST" action="/new">
+      <input type="text" name="title" placeholder="Title" style="padding-bottom: 2e;">
+      <br>
+      <input type="text" name="subtitle" placeholder="Sub-title" style="padding-bottom: 2e;">
+      <br>
+      <textarea name="post" style="padding-bottom: 2e"></textarea>
+      <br>
+      <footer>
+	<ul class="actions">
+	  <li><input type="submit" name="submit" class="button big"></li>
+	</ul>
+      </footer>
+    </form>
+  </article>
 
-      <!-- Sidebar -->
-      <section id="sidebar">
+</div>
 
-	<!-- Intro -->
-	<section id="intro">
-	  <a href="#" class="logo"><img src="static/images/logo.jpg" alt="" /></a>
-	  <header>
-	    <h2>Storytime Fun Site</h2>
-	    <p>Write and share stories with your friends in real-time!</p>
-	  </header>
-	</section>
-
-	<!-- Account info -->
-	<section>
-	  <header class="bold" id="account-info">
-	    <p>Logged in as: <a href="/account">{{ username }}</a></p>
-	  </header>
-	  <div class="align-center">
-	    <a href="/logout" class="button">Log Out</a>
-	  </div>
-	</section>
-	
-	<!-- About -->
-	<section class="blurb">
-	  <h2>About</h2>
-	  <p>Story Builder is a site in which users can create and share stories with the world. It is designed to allow creative writers to go forth and share their ideas and to build interesting, funny or quirky stories with people on the web.</p>
-	  <ul class="actions">
-	    <li><a href="/about" class="button">Learn More</a></li>
-	  </ul>
-	</section>
-
-	<!-- Footer -->
-	<section id="footer">
-	  <ul class="icons">
-	    <li><a href="#" class="fa-twitter"><span class="label">Twitter</span></a></li>
-	    <li><a href="#" class="fa-facebook"><span class="label">Facebook</span></a></li>
-	    <li><a href="#" class="fa-instagram"><span class="label">Instagram</span></a></li>
-	    <li><a href="#" class="fa-rss"><span class="label">RSS</span></a></li>
-	    <li><a href="#" class="fa-envelope"><span class="label">Email</span></a></li>
-	  </ul>
-	  <p class="copyright">&copy; Untitled. Design: <a href="http://html5up.net">HTML5 UP</a>. Images: <a href="http://unsplash.com">Unsplash</a>.</p>
-	</section>
-
-      </section>
-
-    </div>
-
-    <!-- Scripts -->
-    <script src="static/js/jquery.min.js"></script>
-    <script src="static/js/skel.min.js"></script>
-    <script src="static/js/util.js"></script>
-    <script src="static/js/mobile.js"></script>
-    <!--[if lte IE 8]><script src="static/js/ie/respond.min.js"></script><![endif]-->
-    <script src="static/js/main.js"></script>
-
-  </body>
-</html>
+{% endblock %}
