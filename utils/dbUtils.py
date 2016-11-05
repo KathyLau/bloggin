@@ -7,14 +7,16 @@ Recently added fxns in chrono order:
 > userInDB (helper for auths)
 > getTables, printTable (for debug)
 ! addUser (takes username and hashed pass)
-! addStory
+! createStory
 ! getUserID (given username string)
 > userInDB (takes EITHER username or userID) 
 '''
+# TODO: MAKE FXN W VARGS THAT RETURNS INT IF GIVEN STRING(S) EMPTY
+# TODO: ROBUSTIFY isInDB
 
 import sqlite3
 from pprint import pprint
-print __name__
+
 #!!! NOTE !!!: depending on where this is run, it will access different db files (one in /data/tabular.db and one in /utils/data/tabular.db
 conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
 
@@ -56,15 +58,15 @@ def setup():
 
 
 '''
-USERINDB: tests if userID/username exists in db file
-> Input: INT userID *OR* STRING username to query for existance
+ISINDB: tests if row exists in db file
+> Input: *TUPLE (<column>, <value>)
 > Output: True if user already in db, False otherwise
 '''
 def userInDB(user):
-    if isinstance(user, (int, long)): #was given ID
+    if isinstance(user, (int, long)): #was given ID (int)
         q = "SELECT 1 FROM user WHERE id=? LIMIT 1;"
     else:
-        assert isinstance(user, (str, unicode)), "*** user was invalid type: %s ***" % type(user)
+        assert isinstance(user, (str, unicode)), "*** user was invalid type: %s ***" % type(user) #assume was given username (string)
         q = "SELECT 1 FROM user WHERE username=? LIMIT 1;"
     return True if c.execute(q, (user,)).fetchone() else False
 
@@ -77,7 +79,7 @@ GETUSERID: get userID given username (presum to store in session)
 def getUserID(username):
     assert username.strip() and userInDB(username) #username not blank and in DB
     q = "SELECT id, username FROM user WHERE username=? LIMIT 1;"
-    return c.execute(q, (username,)).fetchone()[0] #should be userID
+    return c.execute(q, (username,)).fetchone()[0] #should be user_id
 
 
 '''
@@ -128,18 +130,22 @@ def registerAuth(username, password, password_repeat):
 
 '''
 ADDUSER: Adds user to db
-> Input: STRING username, STRING password_hashed
+> Input: STRING username, STRING password (should be hashed by now!)
 '''
-def addUser(username, password_hashed):
+def addUser(username, password):
     assert not userInDB(username), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
     q = "INSERT INTO user(username, password) VALUES(?,?)"
-    c.execute(q, (username, password_hashed))
+    c.execute(q, (username, password))
     conn.commit()
 
 
 '''
-ADDSTORY: Adds newly created story to db
-> Input: INT userID, STRING title, STRING subtitle, STRING preContent
+CREATESTORY: Adds newly created story to db
+> Input
+  > INT user_id (creator's user ID)
+  > STRING title
+  > STRING subtitle
+  > STRING preContent (actual starting text of story)
 > Output:
   > 0 if all ok
   > 1 if userID invalid (not int)
@@ -147,23 +153,49 @@ ADDSTORY: Adds newly created story to db
   > 3 if preContent empty
   > 4 if user already has story with same title
 '''
-def addStory(userID, title, subtitle, preContent):
-    if not isinstance(userID, (int, long)):
+def createStory(user_id, title, subtitle, preContent):
+    if not isinstance(user_id, (int, long)):
         return 1
     if not title.strip():
         return 2
     if not preContent.strip():
         return 3
     q = "SELECT 1 FROM story WHERE user_id=? AND title=? LIMIT 1;"
-    titleRepeated = c.execute(q, (userID, title)).fetchone()
+    titleRepeated = c.execute(q, (user_id, title)).fetchone()
     if titleRepeated:
         return 4
     q = "INSERT INTO story(user_id, title, subtitle, preContent) VALUES(?,?,?,?)"
-    c.execute(q, (userID, title, subtitle, preContent))
+    c.execute(q, (user_id, title, subtitle, preContent))
     conn.commit()
     return 0
 
 
+'''
+EXTENDSTORY: add to another users' story instead of creating one
+> Input: 
+  > INT story_id (which story you're adding to)
+  > INT user_id (YOUR user ID)
+  > STRING extContent (what you're adding)
+> Output:
+  > 0 if all ok
+  > 1 if story_id empty OR not an int
+  > 2 if user_id empty OR not an int
+  > 3 if story_id not found
+  > 4 if user_id not found
+'''
+def extendStory(story_id, user_id, extContent):
+    if not (story_id and isinstance(story_id, (int, long))):
+        return 1
+    if not (user_id and isinstance(user_id, (int, long))):
+        return 2
+
+    q = "INSERT INTO extension(story_id, user_id, extContent) VALUES (?,?,?);"
+    c.execute(q, story_id, user_id, extContent)
+
+
+#############################################################################
+########################### FOR TESTING ONLY ################################
+#############################################################################
 '''
 GETTABLES: temp fxn to check if tables created already
 > Output: list of table names IF cursor exists, None otherwise
@@ -185,8 +217,6 @@ def printTable(tableName):
     q = "SELECT * FROM %s;" % tableName
     tableData = c.execute(q).fetchall()
     pprint(tableData)
-
-#TODO: check if user already commented on post
 
 
 def tmp():
@@ -238,13 +268,13 @@ def debug():
     print "\t%d (should be 2)" % getUserID("cop")
     print "\t%d (should be 5)" % getUserID("yawk")
 
-    print "\nTESTING ADDSTORY..."
-    print "\t%d (should be 1)" % addStory("3", "a", "b", "c")
-    print "\t%d (should be 2)" % addStory(3, "  ", "w", "w")
-    print "\t%d (should be 3)" % addStory(3, "a", "b", "\t\n")
-    print "\t%d (should be 0)" % addStory(3, "title", "subtitle", "content")
-    print "\t%d (should be 4)" % addStory(3, "title", "b", "c")
-    print "\t%d (should be 0)" % addStory(getUserID("cop"), "no subtitle", "", "should work!")
+    print "\nTESTING CREATESTORY..."
+    print "\t%d (should be 1)" % createStory("3", "a", "b", "c")
+    print "\t%d (should be 2)" % createStory(3, "  ", "w", "w")
+    print "\t%d (should be 3)" % createStory(3, "a", "b", "\t\n")
+    print "\t%d (should be 0)" % createStory(3, "title", "subtitle", "content")
+    print "\t%d (should be 4)" % createStory(3, "title", "b", "c")
+    print "\t%d (should be 0)" % createStory(getUserID("cop"), "no subtitle", "", "should work!")
     print "\t* Stories added to 'smol' and 'cop'"
 
     print "\nPRINTING USERS..."
@@ -255,6 +285,7 @@ def debug():
 
     print "\nPRINTING EXTENSIONS..."
     printTable("extension")
+
 
     
 if __name__ == "__main__":
