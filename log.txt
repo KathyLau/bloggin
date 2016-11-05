@@ -24,4 +24,4 @@
 11/4 home
 - Daniel: fixed big database problem and login problem; made front-end for creating posts; added js for mobile; put links in menu.
 - Kelly: finished login and register by adding hashed passwords!
-
+- William: addUser, addStory, getUserID (given username), userInDB check, and general robustification
