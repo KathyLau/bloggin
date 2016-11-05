@@ -19,10 +19,13 @@ def login():
     else:
         user = request.form["user"]
         pwd = request.form["pass"]
+        hashObj = hashlib.sha1()
+        hashObj.update(pwd)
+        pwd = hashObj.hexdigest()
         #fxn to verify w SQL
         #if true: add session and redirect to home page
         if utils.dbUtils.loginAuth(user, pwd) == 0:
-        #else return login page
+            #else return login page
             session["user"] = user
             return redirect(url_for("home"))
         else:
@@ -32,16 +35,18 @@ def login():
 def reg():
     if request.method=="GET":
         return render_template("register.html")
+    #else return reg page
     else:
         user = request.form["user"]
         pwd = request.form["pass"]
         confirm = request.form["confirm"]
         if utils.dbUtils.registerAuth(user, pwd, confirm) == 0:
-        #else return reg page
+            hashObj = hashlib.sha1()
+            hashObj.update(pwd)
+            pwd = hashObj.hexdigest()
             utils.dbUtils.addUser(user, pwd)
             session["user"] = user
             return redirect(url_for("home"))
-
         return redirect(url_for("login"))
 
 
@@ -60,7 +65,7 @@ def create():
             post = request.form["post"]
             title = request.form["title"]
             sub = request.form["subtitle"]
-            userID = session["url"]
+            userID = session["user"]
             #SQL work
     else:
         return redirect(url_for("login"))
