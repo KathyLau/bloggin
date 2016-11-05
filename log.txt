@@ -7,7 +7,8 @@
 - Daniel: Cut some stuff out of frontend templates to make login and register pages
 
 11/2 class
-- Daniel: Removed some more unneccesary stuff from webpage. 
+- Daniel: Removed some more unneccesary stuff from webpage.
+- Kelly: made basic app routes (for home, login, register, and logout)
 
 11/2 home
 - William: integrated table gen (init sequence) of db in utils/dbUtils.py
@@ -16,3 +17,11 @@
 
 11/3 home
 - William: finished register in dbUtils and bugfixes (w/ Daniel's help)
+
+11/4 class
+- Kelly: made routes for creating and adding onto posts; linked with database functions; fixed redirects.
+
+11/4 home
+- Daniel: fixed big database problem and login problem; made front-end for creating posts; added js for mobile; put links in menu.
+- Kelly: finished login and register by adding hashed passwords!
+
