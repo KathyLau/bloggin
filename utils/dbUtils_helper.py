@@ -1,5 +1,6 @@
 import sqlite3
 from pprint import pprint
+from collections import defaultdict
 
 #mutliple conns supported by sqlite3!
 conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
@@ -21,7 +22,7 @@ def setup():
     user_id INT NOT NULL,
     title TEXT,
     subtitle TEXT,
-    preContent TEXT,
+    content TEXT,
     create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
     );
     '''
@@ -32,7 +33,7 @@ def setup():
     id INTEGER PRIMARY KEY,
     user_id INT NOT NULL,
     story_id INT NOT NULL,
-    extContent TEXT,
+    content TEXT,
     create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
     );
     '''
