@@ -38,18 +38,18 @@
 ### 11/4 Home
 - Daniel: fixed big database problem and login problem; made front-end for creating posts; added js for mobile; put links in menu.
 - Kelly: finished login and register by adding hashed passwords!
-- William: addUser, addStory, getUserID (given username), userInDB check, and general robustification
+- William: addUser, createStory, getUserID (given username), userInDB check, and general robustification
 
 ===
 
 
 ### 11/5 Home
 - Daniel: refactored jinja templates to use inheritance
-
 ===
 
-
-
+### 11/6 Home
+- William: extendStory, getStoryInfo, isInDB rehaul
+===
 
 # STILL NEED TO DO
 
