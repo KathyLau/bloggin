@@ -4,15 +4,13 @@ Recently added fxns in chrono order:
   "!" means should implement in app.py
 > setup, tmp, debug
 ! loginAuth, registerAuth
-> userInDB (helper for auths)
+> isInDB (helper for auths)
 > getTables, printTable (for debug)
 ! addUser (takes username and hashed pass)
 ! createStory
 ! getUserID (given username string)
-> userInDB (takes EITHER username or userID) 
+! getContributedPosts
 '''
-# TODO: MAKE FXN W VARGS THAT RETURNS INT IF GIVEN STRING(S) EMPTY
-# TODO: ROBUSTIFY isInDB given table and tuples
 
 import sqlite3
 from dbUtils_helper import *
@@ -130,33 +128,58 @@ EXTENDSTORY: add to another users' story instead of creating one
   > STRING extContent (what you're adding)
 > Output:
   > 0 if all ok
-  > 1 if user_id empty OR not an int
-  > 2 if story_id empty OR not an int
-  > 3 user_id not found OR story_id not found OR user already contributed to story
+  > 1 if user_id not an int
+  > 2 if story_id not an int
+  > 3 if user_id not found in user table
+  > 4 if story_id not found in story table
+  > 5 user already contributed to story
 '''
 def extendStory(user_id, story_id, extContent):
-    if not (user_id and isinstance(user_id, (int, long))):
+    #solely for easier debugging
+    if not isinstance(user_id, (int, long)):
         return 1
-    if not (story_id and isinstance(story_id, (int, long))):
+    if not isinstance(story_id, (int, long)):
         return 2
 
-    #checking if user has either created or added this story
-    if isInDB(("user.id",user_id), ("story.id=%s OR extension.story_id" % story_id, story_id),\
-                  table="story INNER JOIN extension ON story.id == extension.story_id;"):
+    if not isInDB( ("id", user_id) ):
         return 3
+    if not isInDB( ("id", story_id), table = "story" ):
+        return 4
+
+    #checking if user has either created or added this story
+    if isInDB(("story.user_id=%s OR extension.user_id"%user_id, user_id), \
+              ("story.id=%s OR extension.story_id"%story_id, story_id), \
+              table="story LEFT JOIN extension ON story.id = extension.story_id"):
+        return 5
 
     q = "INSERT INTO extension(story_id, user_id, extContent) VALUES (?,?,?);"
-    c.execute(q, story_id, user_id, extContent)
+    c.execute(q, (story_id, user_id, extContent))
     conn.commit()
     return 0
 
-'''
 
+'''
+GETCONTRIBUTEDPOSTS: returns relevant info on all stories
+that a user has either created or added to
+> Input: INT user_id
+> Output: [LIST of {DICTS representing posts}]
+[
+  {"title": "sample_title",
+   "subtitle": "sample_subtitle",
+   "creator
 '''
 
 
 def debug():
-    #exists: [top: kek], [cop, tech]
+    #initial stuff
+    q = "INSERT INTO user(username, password) VALUES(\"top\",\"kek\");"
+    c.execute(q);
+    q = "INSERT INTO user(username, password) VALUES(\"cop\",\"tech\");"
+    c.execute(q);
+    conn.commit()
+
+    #using assert for less clutter in terminal
+    #and sooner notice of error
     print "\nTESTING LOGIN..."
     try:
         assert loginAuth("cop","lek") == 4
@@ -167,7 +190,8 @@ def debug():
         assert loginAuth("cop","tech") == 0
         print "\tAll good!"
     except Exception, e:
-        print "\t errors, woo!"
+        print "\t ERRORS!!!"
+        raise
 
     print "\nTESTING REGISTER..."
     try:
@@ -181,7 +205,8 @@ def debug():
         assert registerAuth("shop", "tech", "tech") == 0
         print "\tAll good!"
     except Exception, e:
-        print "\t errors, woo hoo!"
+        print "\t ERRORS!!!"
+        raise
     
     print "\nTESTING ADDUSER..."
     try:
@@ -195,6 +220,7 @@ def debug():
     try:
         addUser("top", "asdf") #should throw error
         print "\tTHIS SHOULD HAVE THEN AN ERROR!"
+        raise
     except:
         print "\tThrew user already found error! (intended)"
 
@@ -206,8 +232,10 @@ def debug():
         assert getUserID("cop") == 2
         assert getUserID("yawk") == 5
         print "\tAll good!"
-    except Exception(e):
-        print "\tlooks like we got some errors fam"
+    except Exception, e:
+        print "\to no didnt expect this one"
+        raise
+        
 
     print "\nTESTING CREATESTORY..."
     try:
@@ -216,13 +244,23 @@ def debug():
         assert createStory(3, "a", "b", "\t\n") == 3
         assert createStory(3, "title", "subtitle", "content") == 0
         assert createStory(3, "title", "b", "c") == 4
+        assert createStory(getUserID("smol"), "smol_title", "smol", "smol") == 0
         assert createStory(getUserID("cop"), "no subtitle", "", "should work!") == 0
-        print "\t* Stories added to 'smol' and 'cop' (all good!)"
-    except Exception(e):
-        print "\tlooks like we got some errors fam"
+        print "\t* Stories added to 'smol'(2) and 'cop'(1) => All good!"
+    except Exception, e:
+        print "\tmore errors asdfsasdf"
+        raise
 
     print "\nTESTING EXTENDSTORY..."
-#    print "\t%d (should be 1)" % extendStory("")
+    print "\t%d (should be 1)" % extendStory("u",1,"c")
+    print "\t%d (should be 2)" % extendStory(1,"s","c")
+    print "\t%d (should be 3)" % extendStory(-1,2,"c")
+    print "\t%d (should be 4)" % extendStory(3,-1,"c")
+    print "\t%d (should be 5)" % extendStory(getUserID("smol"), 2, 1) #smol created story 1
+    print "\t%d (should be 0)" % extendStory(getUserID("cop"), 2, "yawk wuz hear")
+    print "\t%d (should be 5)" % extendStory(getUserID("cop"), 2, "yawk already hear") #yawk just added to story 2
+    print "'yawk' contributed to story 2 by smol"
+
 
     print "\nPRINTING USERS..."
     printTable("user")
@@ -235,5 +273,4 @@ def debug():
 if __name__ == "__main__":
     if 'user' not in getTables():
         setup()
-        tmp()
     debug()
