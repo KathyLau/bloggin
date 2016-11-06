@@ -12,63 +12,15 @@ Recently added fxns in chrono order:
 > userInDB (takes EITHER username or userID) 
 '''
 # TODO: MAKE FXN W VARGS THAT RETURNS INT IF GIVEN STRING(S) EMPTY
-# TODO: ROBUSTIFY isInDB
+# TODO: ROBUSTIFY isInDB given table and tuples
 
 import sqlite3
-from pprint import pprint
+from dbUtils_helper import *
 
 #!!! NOTE !!!: depending on where this is run, it will access different db files (one in /data/tabular.db and one in /utils/data/tabular.db
 conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
 
 c = conn.cursor()
-
-
-def setup():
-    q = '''
-    CREATE TABLE user (
-    id INTEGER PRIMARY KEY,
-    username VARCHAR(50) UNIQUE,
-    password VARCHAR(50)
-    );
-    '''
-    c.execute(q)
-
-    q = '''
-    CREATE TABLE story (
-    id INTEGER PRIMARY KEY,
-    user_id INT NOT NULL,
-    title TEXT,
-    subtitle TEXT,
-    preContent TEXT,
-    create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    );
-    '''
-    c.execute(q)
-
-    q = '''
-    CREATE TABLE extension (
-    id INTEGER PRIMARY KEY,
-    user_id INT NOT NULL,
-    story_id INT NOT NULL,
-    extContent TEXT,
-    create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    );
-    '''
-    c.execute(q)
-
-
-'''
-ISINDB: tests if row exists in db file
-> Input: *TUPLE (<column>, <value>)
-> Output: True if user already in db, False otherwise
-'''
-def userInDB(user):
-    if isinstance(user, (int, long)): #was given ID (int)
-        q = "SELECT 1 FROM user WHERE id=? LIMIT 1;"
-    else:
-        assert isinstance(user, (str, unicode)), "*** user was invalid type: %s ***" % type(user) #assume was given username (string)
-        q = "SELECT 1 FROM user WHERE username=? LIMIT 1;"
-    return True if c.execute(q, (user,)).fetchone() else False
 
 
 '''
@@ -77,7 +29,7 @@ GETUSERID: get userID given username (presum to store in session)
 > Output: INT userID
 '''
 def getUserID(username):
-    assert username.strip() and userInDB(username) #username not blank and in DB
+    assert username.strip() and isInDB( ("username",username) ) #username not blank and in DB
     q = "SELECT id, username FROM user WHERE username=? LIMIT 1;"
     return c.execute(q, (username,)).fetchone()[0] #should be user_id
 
@@ -97,7 +49,7 @@ def loginAuth(username, password):
         return 1
     if not password.strip(): #password empty
         return 2
-    if userInDB( username ):
+    if isInDB( ("username", username) ):
         q = "SELECT 1 FROM user WHERE username=? AND password=? LIMIT 1;"
         correctPass = c.execute(q, (username, password)).fetchone()
         if correctPass:
@@ -123,7 +75,7 @@ def registerAuth(username, password, password_repeat):
         return 2
     if password != password_repeat:
         return 3
-    if userInDB( username ):
+    if isInDB( ("username", username) ):
         return 4
     return 0
 
@@ -133,7 +85,7 @@ ADDUSER: Adds user to db
 > Input: STRING username, STRING password (should be hashed by now!)
 '''
 def addUser(username, password):
-    assert not userInDB(username), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
+    assert not isInDB( ("username",username) ), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
     q = "INSERT INTO user(username, password) VALUES(?,?)"
     c.execute(q, (username, password))
     conn.commit()
@@ -178,74 +130,58 @@ EXTENDSTORY: add to another users' story instead of creating one
   > STRING extContent (what you're adding)
 > Output:
   > 0 if all ok
-  > 1 if story_id empty OR not an int
-  > 2 if user_id empty OR not an int
-  > 3 if story_id not found
-  > 4 if user_id not found
+  > 1 if user_id empty OR not an int
+  > 2 if story_id empty OR not an int
+  > 3 user_id not found OR story_id not found OR user already contributed to story
 '''
-def extendStory(story_id, user_id, extContent):
-    if not (story_id and isinstance(story_id, (int, long))):
-        return 1
+def extendStory(user_id, story_id, extContent):
     if not (user_id and isinstance(user_id, (int, long))):
+        return 1
+    if not (story_id and isinstance(story_id, (int, long))):
         return 2
+
+    #checking if user has either created or added this story
+    if isInDB(("user.id",user_id), ("story.id=%s OR extension.story_id" % story_id, story_id),\
+                  table="story INNER JOIN extension ON story.id == extension.story_id;"):
+        return 3
 
     q = "INSERT INTO extension(story_id, user_id, extContent) VALUES (?,?,?);"
     c.execute(q, story_id, user_id, extContent)
-
-
-#############################################################################
-########################### FOR TESTING ONLY ################################
-#############################################################################
-'''
-GETTABLES: temp fxn to check if tables created already
-> Output: list of table names IF cursor exists, None otherwise
-'''
-def getTables():
-    if c != None:
-        q = "SELECT name FROM sqlite_master WHERE type='table';"
-        c.execute(q)
-        list_tableName = map((lambda table: str(table[0])), c.fetchall())
-        return list_tableName
-    return None
-
-
-'''
-PRINTTABLE: prints out table in DB in human-readable format
-> Input: STRING tableName
-'''
-def printTable(tableName):
-    q = "SELECT * FROM %s;" % tableName
-    tableData = c.execute(q).fetchall()
-    pprint(tableData)
-
-
-def tmp():
-    q = "INSERT INTO user(username, password) VALUES(\"top\",\"kek\");"
-    c.execute(q);
-    q = "INSERT INTO user(username, password) VALUES(\"cop\",\"tech\");"
-    c.execute(q);
     conn.commit()
+    return 0
 
-    
+'''
+
+'''
+
+
 def debug():
     #exists: [top: kek], [cop, tech]
     print "\nTESTING LOGIN..."
-    print "\t%d (should be 4)" % loginAuth("cop","lek")
-    print "\t%d (should be 3)" % loginAuth("shop","kek")
-    print "\t%d (should be 2)" % loginAuth("cop","")
-    print "\t%d (should be 1)" % loginAuth("","tech")
-    print "\t%d (should be 0)" % loginAuth("top","kek")
-    print "\t%d (should be 0)" % loginAuth("cop","tech")
+    try:
+        assert loginAuth("cop","lek") == 4
+        assert loginAuth("shop","kek") == 3
+        assert loginAuth("cop","") == 2
+        assert loginAuth("","tech") == 1
+        assert loginAuth("top","kek") == 0
+        assert loginAuth("cop","tech") == 0
+        print "\tAll good!"
+    except Exception, e:
+        print "\t errors, woo!"
 
     print "\nTESTING REGISTER..."
-    print "\t%d (should be 4)" % registerAuth("cop", "mop", "mop")
-    print "\t%d (should be 4)" % registerAuth("top", "kek", "kek")
-    print "\t%d (should be 3)" % registerAuth("shop", "lop", "mop")
-    print "\t%d (should be 2)" % registerAuth("stop", "", "")
-    print "\t%d (should be 2)" % registerAuth("stop", "abc", "")
-    print "\t%d (should be 1)" % registerAuth("", "nop", "nop")
-    print "\t%d (should be 0)" % registerAuth("pot", "kek", "kek")
-    print "\t%d (should be 0)" % registerAuth("shop", "tech", "tech")
+    try:
+        assert registerAuth("cop", "mop", "mop") == 4
+        assert registerAuth("top", "kek", "kek") == 4
+        assert registerAuth("shop", "lop", "mop") == 3
+        assert registerAuth("stop", "", "") == 2
+        assert registerAuth("stop", "abc", "") == 2
+        assert registerAuth("", "nop", "nop") == 1
+        assert registerAuth("pot", "kek", "kek") == 0
+        assert registerAuth("shop", "tech", "tech") == 0
+        print "\tAll good!"
+    except Exception, e:
+        print "\t errors, woo hoo!"
     
     print "\nTESTING ADDUSER..."
     try:
@@ -258,38 +194,46 @@ def debug():
         raise
     try:
         addUser("top", "asdf") #should throw error
+        print "\tTHIS SHOULD HAVE THEN AN ERROR!"
     except:
         print "\tThrew user already found error! (intended)"
 
     print "\nTESTING GETUSERID..."
-    print "\t%d (should be 1)" % getUserID("top")
-    print "\t%d (should be 3)" % getUserID("smol")
-    print "\t%d (should be 4)" % getUserID("bloggos")
-    print "\t%d (should be 2)" % getUserID("cop")
-    print "\t%d (should be 5)" % getUserID("yawk")
+    try:
+        assert getUserID("top") == 1
+        assert getUserID("smol") == 3
+        assert getUserID("bloggos") == 4
+        assert getUserID("cop") == 2
+        assert getUserID("yawk") == 5
+        print "\tAll good!"
+    except Exception(e):
+        print "\tlooks like we got some errors fam"
 
     print "\nTESTING CREATESTORY..."
-    print "\t%d (should be 1)" % createStory("3", "a", "b", "c")
-    print "\t%d (should be 2)" % createStory(3, "  ", "w", "w")
-    print "\t%d (should be 3)" % createStory(3, "a", "b", "\t\n")
-    print "\t%d (should be 0)" % createStory(3, "title", "subtitle", "content")
-    print "\t%d (should be 4)" % createStory(3, "title", "b", "c")
-    print "\t%d (should be 0)" % createStory(getUserID("cop"), "no subtitle", "", "should work!")
-    print "\t* Stories added to 'smol' and 'cop'"
+    try:
+        assert createStory("3", "a", "b", "c") == 1
+        assert createStory(3, "  ", "w", "w") == 2
+        assert createStory(3, "a", "b", "\t\n") == 3
+        assert createStory(3, "title", "subtitle", "content") == 0
+        assert createStory(3, "title", "b", "c") == 4
+        assert createStory(getUserID("cop"), "no subtitle", "", "should work!") == 0
+        print "\t* Stories added to 'smol' and 'cop' (all good!)"
+    except Exception(e):
+        print "\tlooks like we got some errors fam"
+
+    print "\nTESTING EXTENDSTORY..."
+#    print "\t%d (should be 1)" % extendStory("")
 
     print "\nPRINTING USERS..."
     printTable("user")
-
     print "\nPRINTING STORIES..."
     printTable("story")
-
     print "\nPRINTING EXTENSIONS..."
     printTable("extension")
-
 
     
 if __name__ == "__main__":
     if 'user' not in getTables():
         setup()
         tmp()
-        debug()
+    debug()
