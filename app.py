@@ -68,8 +68,11 @@ def create():
             post = request.form["post"]
             title = request.form["title"]
             sub = request.form["subtitle"]
-            userID = session["user"]
+            user = session["user"]
+            userID = utils.dbUtils.getUserID(user)
             #SQL work
+            utils.dbUtils.createStory(userID, title, sub, post)
+            return redirect(url_for("yourstories"))
     else:
         return redirect(url_for("login"))
 
@@ -82,8 +85,9 @@ def add():
             post = request.form["post"]
             title = request.form["title"]
             sub = request.form["subtitle"]
-            userID = session["user"]
+            userID = utils.dbUtils.getUserID(session["user"])
             #SQL work
+            #utils.dbUtils.extendStory(
     else:
         return redirect(url_for("login"))
 
