@@ -332,20 +332,17 @@ e.g. [ <story_id>, <story_id>, ... ]
 '''
 def getNonContributedStories( user_id ):
     assert helper.isInDB( ("id",user_id) ), "UserID not found in DB!"
+    
     q = '''
     SELECT DISTINCT story.id
     FROM story
     LEFT JOIN extension
     ON story.id = extension.story_id
-    WHERE story.user_id IS NOT ?
-    AND extension.user_id IS NOT ?
     ORDER BY
     CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END;
     '''
-    #CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END
-    return [ user_id[0] for user_id in c.execute(q, (user_id, user_id)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
-
-
+    allPosts = [ story_id[0] for story_id in c.execute(q).fetchall() ] #b/c fetchall puts the data in annoying tuple form
+    return list( filter((lambda x: x not in getContributedStories(user_id)), allPosts))
 
 
 
