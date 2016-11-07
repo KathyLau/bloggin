@@ -1,5 +1,9 @@
 {% extends "sideandnavbar.html" %}
 
+{% block username %}
+Logged in as: <b><i>{{ username }}</i></b>
+{% endblock username %}
+
 {% block content %}
 
 <!-- Main -->
@@ -10,33 +14,32 @@
   <article class="post">
     <header>
       <div class="title">
-	<h2><a href="#">{{ post[ 'title' ] }}</a></h2>
+	<h2><a href="{{ '/%s/%s' % (username, post['id']) }}">{{ post[ 'title' ] }}</a></h2>
 	<p>{{ post[ 'subtitle' ] }}</p>
       </div>
       <div class="meta">
-	<time class="published" datetime="2015-11-01">November 1, 2015</time>
+	<time class="published">{{ post["create_ts"] }}</time>
 	<a href="#" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src="/static/images/avatar.jpg" alt="" /></a>
       </div>
     </header>
-    <p>{{ post [ 'content' ] }}</p>
+    <p> 
+
+        {% if post["extensions"] %}
+          {{ post["extensions"][-1]["content"] }}
+        {% else %}
+          {{ post["content"] }}
+        {% endif %}
+      
+    </p>
     <footer>
       <ul class="actions">
-	{% if post['url'] %}
-
-	{% if find %}
-	<li><a href={{post['url'] + "/extend"}} class="button big">Continue Reading</a></li>
-	{% else %}
-	<li><a href={{post['url']}} class="button big">Continue Reading</a></li>
-	{% endif %}
-	
-	{% else %}
-	<li><a href="#" class="button big">Continue Reading</a></li>
-	{% endif %}
+	<li><a href="{{ '/%s/%s' % (username, post['id']) }}" class="button big">Continue Reading</a></li>
       </ul>
+
       <ul class="stats">
 	<li><a href="#">General</a></li>
-	<li><a href="#" class="icon fa-heart">28</a></li>
-	<li><a href="#" class="icon fa-comment">128</a></li>
+	<li><a href="#" class="icon fa-heart">420</a></li>
+	<li><a href="#" class="icon fa-comment">1337</a></li>
       </ul>
     </footer>
   </article>

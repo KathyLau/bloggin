@@ -2,7 +2,9 @@
 
 <html>
   <head>
+    {% block title %}
     <title>Storytime Fun Site</title>
+    {% endblock title %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!--[if lte IE 8]><script src="/static/js/ie/html5shiv.js"></script><![endif]-->
@@ -21,8 +23,13 @@
 	<nav class="links">
 	  <ul>
 	    <li><a href="/yourstories">Your Stories</a></li>
-	    <li><a href="/find">Find Stories</a></li>
+	    <li><a href="/find">Explore</a></li>
 	    <li><a href="/new">Create Story</a></li>
+	    <li></p>
+	      {% block username %}
+	      <i>Not currently logged in</i>
+	      {% endblock username %}
+	    </p></li>
 	  </ul>
 	</nav>
 	<nav class="main">
@@ -65,9 +72,6 @@
 
 	<!-- Account info -->
 	<section>
-	  <header class="bold" id="account-info">
-	    <p>Logged in as: <a href="/account">{{ username }}</a></p>
-	  </header>
 	  <div class="align-center">
 	    <a href="/logout" class="button">Log Out</a>
 	  </div>

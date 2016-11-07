@@ -37,14 +37,66 @@ def initConnection(path):
 
 
 '''
+SETUP: sets up tables (if db is empty)
+'''
+def setup():
+    if 'user' not in helper.getTables():
+        q = '''
+        CREATE TABLE user (
+        id INTEGER PRIMARY KEY,
+        username VARCHAR(50) UNIQUE,
+        password VARCHAR(50)
+        );
+        '''
+        c.execute(q)
+        
+        q = '''
+        CREATE TABLE story (
+        id INTEGER PRIMARY KEY,
+        user_id INT NOT NULL,
+        title TEXT,
+        subtitle TEXT,
+        content TEXT,
+        create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+        );
+        '''
+        c.execute(q)
+        
+        q = '''
+        CREATE TABLE extension (
+        id INTEGER PRIMARY KEY,
+        user_id INT NOT NULL,
+        story_id INT NOT NULL,
+        content TEXT,
+        create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+        );
+        '''
+        c.execute(q)
+        conn.commit()
+        
+
+
+'''
 GETUSERID: get userID given username (presum to store in session)
 > Input: STRING username
 > Output: INT userID
 '''
 def getUserID(username):
     assert username.strip() and helper.isInDB( ("username",username) ) #username not blank and in DB
-    q = "SELECT id, username FROM user WHERE username=? LIMIT 1;"
+    q = "SELECT id FROM user WHERE username=? LIMIT 1;"
     return c.execute(q, (username,)).fetchone()[0] #should be user_id
+
+
+
+'''
+GETUSERNAME: get a user's username given ID
+> Input: INT user_id
+> Output: STRING username
+'''
+def getUsername(user_id):
+    assert isinstance(user_id, (int, long)) and helper.isInDB( ("id", user_id) )
+    q = "SELECT username FROM user WHERE id=? LIMIT 1;"
+    return c.execute(q, (user_id,)).fetchone()[0]
 
 
 
@@ -162,7 +214,6 @@ def extendStory(user_id, story_id, content):
               ("story.id=%s OR extension.story_id"%story_id, story_id), \
               table="story LEFT JOIN extension ON story.id = extension.story_id"):
         return 2
-
     q = "INSERT INTO extension(story_id, user_id, content) VALUES (?,?,?);"
     c.execute(q, (story_id, user_id, content))
     conn.commit()
@@ -177,7 +228,8 @@ GETEXTENSIONINFO: returns relevant info about a specific extension
 > Output: DEFAULTDICT (basically a dict) containing extension info
 e.g. {
        'id': 1, 
-       'user_id': 1, 
+       'user_id': 1,
+       'author': "John Doe"
        'story_id': 1, 
        'content': "sample_extContent", 
        'create_ts': "yyyy-mm-dd hh:mm:ss"
@@ -191,9 +243,10 @@ def getExtensionInfo( extension_id ):
 
     #init values to list for cleaner code later
     extInfo = defaultdict(lambda:1)
-
     for i in xrange(len(extColumns)):
         extInfo[extColumns[i]] = extInfo_raw[i]
+
+    extInfo["author"] = getUsername( extInfo["user_id"] )
     return extInfo
 
 
@@ -244,12 +297,13 @@ def getStoryInfo( story_id ):
             extension_id = row[ len(storyColumns) ] #row[6] should be extension_id column of joined table
             storyInfo["extensions"].append( extension_id ) 
 
+    storyInfo["author"] = getUsername( storyInfo["user_id"] )
     return storyInfo
 
 
 
 '''
-GETCONTRIBUTEDSTORIES: returns relevant info on all stories that a user has either created or added to in *chronological order*
+GETCONTRIBUTEDSTORIES: returns info on all stories that user either created or added to, in *chronological order*
 > Input: INT user_id
 > Output: [LIST of {DICTS, each representing a post}]
 e.g. [ <story_id>, <story_id>, ... ]
@@ -262,11 +316,37 @@ def getContributedStories( user_id ):
     LEFT JOIN extension
     ON story.id = extension.story_id
     WHERE ? IN (story.user_id, extension.user_id)
-    ORDER BY story.create_ts;
+    ORDER BY
+    CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END;
     '''
-    #    CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END
+    #CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END
     return [ user_id[0] for user_id in c.execute(q, (user_id,)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
+
+
     
+'''
+GETNONCONTRIBUTEDSTORIES: returns info on all stories user has NOT created or added to, in *chronological order*
+> Input: INT user_id
+> Output: [LIST of {DICTS, each representing a post}]
+e.g. [ <story_id>, <story_id>, ... ]
+'''
+def getNonContributedStories( user_id ):
+    assert helper.isInDB( ("id",user_id) ), "UserID not found in DB!"
+    q = '''
+    SELECT DISTINCT story.id
+    FROM story
+    LEFT JOIN extension
+    ON story.id = extension.story_id
+    WHERE story.user_id IS NOT ?
+    AND extension.user_id IS NOT ?
+    ORDER BY
+    CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END;
+    '''
+    #CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END
+    return [ user_id[0] for user_id in c.execute(q, (user_id, user_id)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
+
+
+
 
 
 def debug():
@@ -395,9 +475,8 @@ def debug():
     helper.printTable("extension")
 
 
-    
+
 if __name__ == "__main__":
     initConnection("data/tabular.db")
-    if 'user' not in helper.getTables():
-        helper.setup()
+    setup()
     debug()

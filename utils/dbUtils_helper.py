@@ -16,44 +16,6 @@ def initConnection(path):
 
 
 '''
-SETUP: sets up tables (if db is empty)
-'''
-def setup():
-    q = '''
-    CREATE TABLE user (
-    id INTEGER PRIMARY KEY,
-    username VARCHAR(50) UNIQUE,
-    password VARCHAR(50)
-    );
-    '''
-    c.execute(q)
-
-    q = '''
-    CREATE TABLE story (
-    id INTEGER PRIMARY KEY,
-    user_id INT NOT NULL,
-    title TEXT,
-    subtitle TEXT,
-    content TEXT,
-    create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    );
-    '''
-    c.execute(q)
-
-    q = '''
-    CREATE TABLE extension (
-    id INTEGER PRIMARY KEY,
-    user_id INT NOT NULL,
-    story_id INT NOT NULL,
-    content TEXT,
-    create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-    );
-    '''
-    c.execute(q)
-    conn.commit()
-
-
-'''
 ISINDB: tests if row exists in db file
 > Input: 
   > [keyword] table = STRING

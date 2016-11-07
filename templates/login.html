@@ -44,6 +44,10 @@
 	    
 	  </header>
 	  
+	  {% if extra %}
+	  <p style="color:#F00">{{ extra }}</p>
+	  {% endif %}
+
 	  <form method="POST" action="/login">
 	    
 	    <p>Username: <input name="user" type="text"></p>
