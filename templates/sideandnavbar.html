@@ -25,11 +25,6 @@
 	    <li><a href="/yourstories">Your Stories</a></li>
 	    <li><a href="/find">Explore</a></li>
 	    <li><a href="/new">Create Story</a></li>
-	    <li></p>
-	      {% block username %}
-	      <i>Not currently logged in</i>
-	      {% endblock username %}
-	    </p></li>
 	  </ul>
 	</nav>
 	<nav class="main">
@@ -73,6 +68,9 @@
 	<!-- Account info -->
 	<section>
 	  <div class="align-center">
+	    <header>
+	      <p>Logged in as {{ username }}</p>
+	    </header>
 	    <a href="/logout" class="button">Log Out</a>
 	  </div>
 	</section>
