@@ -18,6 +18,12 @@ def viewPost(username, postID):
     extensions = story['extensions']
     return render_template("single.html", post=story, extensions=extensions, username=session['user'])
 
+@app.route("/find")
+def find():
+    story = utils.dbUtils.getStoryInfo(postID)
+    extensions = story['extensions']
+    return render_template("multipleposts.html", post=story, extensions=extensions, username=session['user'])
+
 @app.route("/yourstories")
 def yourstories():
     user = session["user"]
