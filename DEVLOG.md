@@ -45,11 +45,13 @@
 
 ### 11/5 Home
 - Daniel: refactored jinja templates to use inheritance
+- Kelly: linked database and /create, fixed bug
 ===
 
 ### 11/6 Home
 - William: extendStory, getStoryInfo, isInDB rehaul
 - Daniel: wrote /find html as well as fixed errors with urls for static. Also wrote app.py function for loading urls and made the /edit site links usable.
+- Kelly: linked database and /yourStories, wrote viewPost, finished /find.
 ===
 
 # STILL NEED TO DO
