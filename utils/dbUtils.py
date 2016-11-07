@@ -257,14 +257,14 @@ e.g. [ <story_id>, <story_id>, ... ]
 def getContributedStories( user_id ):
     assert helper.isInDB( ("id",user_id) ), "UserID not found in DB!"
     q = '''
-    SELECT DISTINCT story.user_id
+    SELECT DISTINCT story.id
     FROM story
     LEFT JOIN extension
     ON story.id = extension.story_id
     WHERE ? IN (story.user_id, extension.user_id)
-    ORDER BY 
-    CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END;
+    ORDER BY story.create_ts;
     '''
+    #    CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END
     return [ user_id[0] for user_id in c.execute(q, (user_id,)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
     
 

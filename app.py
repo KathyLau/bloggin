@@ -23,7 +23,7 @@ def yourstories():
     user = session["user"]
     userID = utils.dbUtils.getUserID(user)
     contributed = utils.dbUtils.getContributedStories(userID)
-    print contributed
+
     posts = []
     for item in contributed:
         posts.append(utils.dbUtils.getStoryInfo(item))
