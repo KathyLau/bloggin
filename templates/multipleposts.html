@@ -18,11 +18,10 @@
 	<a href="#" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src="static/images/avatar.jpg" alt="" /></a>
       </div>
     </header>
-    <a href="#" class="image featured"><img src="static/images/pic01.jpg" alt="" /></a>
     <p>{{ post [ 'content' ] }}</p>
     <footer>
       <ul class="actions">
-	<li><a href="#" class="button big">Continue Reading</a></li>
+	<li><a href={{ post [ 'url' ] }} class="button big">Continue Reading</a></li>
       </ul>
       <ul class="stats">
 	<li><a href="#">General</a></li>
