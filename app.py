@@ -13,7 +13,8 @@ def home():
 @app.route("/<username>/<postID>")
 def viewPost(username, postID):
     story = utils.dbUtils.getStoryInfo(postID)
-    return render_template("single.html", post=story)
+    extensions = story['extensions']
+    return render_template("single.html", post=story, extensions=extensions)
 
 @app.route("/yourstories")
 def yourstories():
