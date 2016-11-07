@@ -16,13 +16,27 @@ Recently added fxns in chrono order:
 
 
 import sqlite3
-from dbUtils_helper import *
+import dbUtils_helper as helper
+from collections import defaultdict
 from pprint import pprint
+import os
 
-#!!! NOTE !!!: depending on where this is run, it will access different db files (one in /data/tabular.db and one in /utils/data/tabular.db
 conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
-
 c = conn.cursor()
+
+
+
+'''
+UPDATEPATHDB: change which DB is being accessed
+> Input: STRING path to db
+>>> NOTE: Intended use: change after importing this module
+'''
+def updatePathDB(path):
+    global conn, c
+    conn.close()
+    conn = sqlite3.connect(path, check_same_thread=False)
+    helper.conn = conn
+    c = conn.cursor()
 
 
 
@@ -32,7 +46,7 @@ GETUSERID: get userID given username (presum to store in session)
 > Output: INT userID
 '''
 def getUserID(username):
-    assert username.strip() and isInDB( ("username",username) ) #username not blank and in DB
+    assert username.strip() and helper.isInDB( ("username",username) ) #username not blank and in DB
     q = "SELECT id, username FROM user WHERE username=? LIMIT 1;"
     return c.execute(q, (username,)).fetchone()[0] #should be user_id
 
@@ -53,7 +67,7 @@ def loginAuth(username, password):
         return 1
     if not password.strip(): #password empty
         return 2
-    if isInDB( ("username", username) ):
+    if helper.isInDB( ("username", username) ):
         q = "SELECT 1 FROM user WHERE username=? AND password=? LIMIT 1;"
         correctPass = c.execute(q, (username, password)).fetchone()
         if correctPass:
@@ -80,7 +94,7 @@ def registerAuth(username, password, password_repeat):
         return 2
     if password != password_repeat:
         return 3
-    if isInDB( ("username", username) ):
+    if helper.isInDB( ("username", username) ):
         return 4
     return 0
 
@@ -92,7 +106,7 @@ ADDUSER: Adds user to db
 >>> NOTE: not returning anything b/c should have already verified everything in registerAuth()
 '''
 def addUser(username, password):
-    assert not isInDB( ("username",username) ), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
+    assert not helper.isInDB( ("username",username) ), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
     q = "INSERT INTO user(username, password) VALUES(?,?)"
     c.execute(q, (username, password))
     conn.commit()
@@ -118,9 +132,7 @@ def createStory(user_id, title, subtitle, content):
         return 1
     if not content.strip():
         return 2
-    q = "SELECT 1 FROM story WHERE user_id=? AND title=? LIMIT 1;"
-    titleRepeated = c.execute(q, (user_id, title)).fetchone()
-    if titleRepeated:
+    if helper.isInDB( ("user_id",user_id), ("title",title), table="story"):
         return 3
     q = "INSERT INTO story(user_id, title, subtitle, content) VALUES(?,?,?,?)"
     c.execute(q, (user_id, title, subtitle, content))
@@ -144,13 +156,13 @@ def extendStory(user_id, story_id, content):
     #solely for easier debugging
     assert isinstance(user_id, (int, long)), "UserID not an int."
     assert isinstance(story_id, (int, long)), "StoryID not an int."
-    assert isInDB( ("id", user_id) ), "UserID not found in DB."
-    assert isInDB( ("id", story_id), table="story" ), "StoryID not found in DB!"
+    assert helper.isInDB( ("id", user_id) ), "UserID not found in DB."
+    assert helper.isInDB( ("id", story_id), table="story" ), "StoryID not found in DB!"
     if not content.strip():
         return 1
 
     #checking if user has either created or added this story
-    if isInDB(("story.user_id=%s OR extension.user_id"%user_id, user_id), \
+    if helper.isInDB(("story.user_id=%s OR extension.user_id"%user_id, user_id), \
               ("story.id=%s OR extension.story_id"%story_id, story_id), \
               table="story LEFT JOIN extension ON story.id = extension.story_id"):
         return 2
@@ -176,7 +188,7 @@ e.g. {
      }
 '''
 def getExtensionInfo( extension_id ):
-    assert isInDB(("id", extension_id), table="extension"), "ExtensionID not found in DB!"
+    assert helper.isInDB(("id", extension_id), table="extension"), "ExtensionID not found in DB!"
     q = "SELECT * FROM extension WHERE id=?;"
     extInfo_raw = c.execute(q, (extension_id,)).fetchone()
     extColumns = ("id", "user_id", "story_id", "content", "create_ts")
@@ -209,7 +221,7 @@ e.g. {
 >>> NOTE: Story without extensions will not have an "extensions" key
 '''
 def getStoryInfo( story_id ):
-    assert isInDB( ("id",story_id), table="story" ), "Story ID not found in DB!"
+    assert helper.isInDB( ("id",story_id), table="story" ), "Story ID not found in DB!"
     
     #init values to list for cleaner code later
     storyInfo = defaultdict(list)
@@ -247,14 +259,15 @@ GETCONTRIBUTEDSTORIES: returns relevant info on all stories that a user has eith
 e.g. [ <story_id>, <story_id>, ... ]
 '''
 def getContributedStories( user_id ):
-    assert isInDB( ("id",user_id) ), "UserID not found in DB!"
+    assert helper.isInDB( ("id",user_id) ), "UserID not found in DB!"
     q = '''
-    SELECT story.id 
+    SELECT DISTINCT story.create_ts, extension.create_ts
     FROM story
     LEFT JOIN extension
     ON story.id = extension.story_id
     WHERE ? IN (story.user_id, extension.user_id)
-    ORDER BY story.create_ts;
+    ORDER BY 
+    CASE WHEN extension.user_id IS NULL then story.create_ts ELSE extension.create_ts END;
     '''
     return [ user_id[0] for user_id in c.execute(q, (user_id,)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
     
@@ -379,15 +392,15 @@ def debug():
 
 
     print "\nPRINTING USER TABLE..."
-    printTable("user")
+    helper.printTable("user")
     print "\nPRINTING STORY TABLE..."
-    printTable("story")
+    helper.printTable("story")
     print "\nPRINTING EXTENSION TABLE..."
-    printTable("extension")
+    helper.printTable("extension")
 
 
     
 if __name__ == "__main__":
-    if 'user' not in getTables():
-        setup()
+    if 'user' not in helper.getTables():
+        helper.setup()
     debug()
