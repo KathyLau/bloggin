@@ -257,7 +257,7 @@ e.g. [ <story_id>, <story_id>, ... ]
 def getContributedStories( user_id ):
     assert helper.isInDB( ("id",user_id) ), "UserID not found in DB!"
     q = '''
-    SELECT DISTINCT story.create_ts, extension.create_ts
+    SELECT DISTINCT story.user_id
     FROM story
     LEFT JOIN extension
     ON story.id = extension.story_id
