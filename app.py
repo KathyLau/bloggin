@@ -72,9 +72,7 @@ def yourstories():
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
 
-    return render_template("multipleposts.html", postlist=posts[:5], username=user)
-
-
+    return render_template("multipleposts.html", postlist=posts[:5], username=session['user'])
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
