@@ -15,13 +15,17 @@
       </div>
       <div class="meta">
 	<time class="published" datetime="2015-11-01">November 1, 2015</time>
-	<a href="#" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src="static/images/avatar.jpg" alt="" /></a>
+	<a href="#" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src="/static/images/avatar.jpg" alt="" /></a>
       </div>
     </header>
     <p>{{ post [ 'content' ] }}</p>
     <footer>
       <ul class="actions">
+	{% if post['url'] %}
 	<li><a href={{post['url']}} class="button big">Continue Reading</a></li>
+	{% else %}
+	<li><a href="#" class="button big">Continue Reading</a></li>
+	{% endif %}
       </ul>
       <ul class="stats">
 	<li><a href="#">General</a></li>
