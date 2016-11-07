@@ -16,13 +16,17 @@ def home():
 def viewPost(username, postID):
     story = utils.dbUtils.getStoryInfo(postID)
     extensions = story['extensions']
-    return render_template("single.html", post=story, extensions=extensions)
+    return render_template("single.html", post=story, extensions=extensions, username=session['user'])
 
 @app.route("/yourstories")
 def yourstories():
     user = session["user"]
     userID = utils.dbUtils.getUserID(user)
-    posts = utils.dbUtils.getContributedStories(userID)
+    contributed = utils.dbUtils.getContributedStories(userID)
+    print contributed
+    posts = []
+    for item in contributed:
+        posts.append(utils.dbUtils.getStoryInfo(item))
     return render_template("multipleposts.html", postlist=posts, username=user)
     
 @app.route("/login", methods=["GET", "POST"])
