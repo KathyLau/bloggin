@@ -11,6 +11,12 @@ def home():
         return redirect(url_for("yourstories"))
     else:
         return redirect(url_for("login"))
+    
+@app.route("/<username>/<postID>")
+def viewPost(username, postID):
+    story = utils.dbUtils.getStoryInfo(postID)
+    extensions = story['extensions']
+    return render_template("single.html", post=story, extensions=extensions)
 
 @app.route("/yourstories")
 def yourstories():
