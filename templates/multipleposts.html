@@ -22,7 +22,13 @@
     <footer>
       <ul class="actions">
 	{% if post['url'] %}
+
+	{% if find %}
+	<li><a href={{post['url'] + "/edit"}} class="button big">Continue Reading</a></li>
+	{% else %}
 	<li><a href={{post['url']}} class="button big">Continue Reading</a></li>
+	{% endif %}
+	
 	{% else %}
 	<li><a href="#" class="button big">Continue Reading</a></li>
 	{% endif %}

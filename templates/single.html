@@ -18,9 +18,17 @@
       </div>
     </header>
     <p>{{ post['content'] }}</p>
+    {% if extensions %}
+    
     {% for extension in extensions %}
     <p>{{ extensions }}</p>
     {% endfor %}
+    
+    {% else %}
+    <form action={{post["url"]}} method="POST">
+      <textarea name="extension" placeholder="Your extension here"></textarea>
+      <input type="submit" name="submit" value="Update Story">
+    </form>
   </article>
 
 </div>
