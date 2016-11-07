@@ -49,6 +49,7 @@
 
 ### 11/6 Home
 - William: extendStory, getStoryInfo, isInDB rehaul
+- Daniel: wrote /find html as well as fixed errors with urls for static. Also wrote app.py function for loading urls and made the /edit site links usable.
 ===
 
 # STILL NEED TO DO
