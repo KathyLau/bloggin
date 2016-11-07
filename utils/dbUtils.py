@@ -10,16 +10,20 @@ Recently added fxns in chrono order:
 ! createStory
 ! getUserID (given username string)
 ! getContributedPosts
-! getStoryInfo (pls read my doc for this)
+! getExtensionInfo (if using, pls read my doc for this)
+! getStoryInfo (also this)
 '''
+
 
 import sqlite3
 from dbUtils_helper import *
+from pprint import pprint
 
 #!!! NOTE !!!: depending on where this is run, it will access different db files (one in /data/tabular.db and one in /utils/data/tabular.db
 conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
 
 c = conn.cursor()
+
 
 
 '''
@@ -31,6 +35,7 @@ def getUserID(username):
     assert username.strip() and isInDB( ("username",username) ) #username not blank and in DB
     q = "SELECT id, username FROM user WHERE username=? LIMIT 1;"
     return c.execute(q, (username,)).fetchone()[0] #should be user_id
+
 
 
 '''
@@ -57,6 +62,7 @@ def loginAuth(username, password):
     return 3
 
 
+
 '''
 REGISTERAUTH: verifies signup auth with db and returns corresponding int
 > Input: STRING username, STRING password, STRING password_repeat
@@ -79,15 +85,18 @@ def registerAuth(username, password, password_repeat):
     return 0
 
 
+
 '''
 ADDUSER: Adds user to db
 > Input: STRING username, STRING password (should be hashed by now!)
+>>> NOTE: not returning anything b/c should have already verified everything in registerAuth()
 '''
 def addUser(username, password):
     assert not isInDB( ("username",username) ), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
     q = "INSERT INTO user(username, password) VALUES(?,?)"
     c.execute(q, (username, password))
     conn.commit()
+
 
 
 '''
@@ -99,26 +108,25 @@ CREATESTORY: Adds newly created story to db
   > STRING content (actual starting text of story)
 > Output:
   > 0 if all ok
-  > 1 if userID invalid (not int)
-  > 2 if title empty
-  > 3 if content empty
-  > 4 if user already has story with same title
+  > 1 if title empty
+  > 2 if content empty
+  > 3 if user already has story with same title
 '''
 def createStory(user_id, title, subtitle, content):
-    if not isinstance(user_id, (int, long)):
-        return 1
+    assert isinstance(user_id, (int, long))
     if not title.strip():
-        return 2
+        return 1
     if not content.strip():
-        return 3
+        return 2
     q = "SELECT 1 FROM story WHERE user_id=? AND title=? LIMIT 1;"
     titleRepeated = c.execute(q, (user_id, title)).fetchone()
     if titleRepeated:
-        return 4
+        return 3
     q = "INSERT INTO story(user_id, title, subtitle, content) VALUES(?,?,?,?)"
     c.execute(q, (user_id, title, subtitle, content))
     conn.commit()
     return 0
+
 
 
 '''
@@ -129,57 +137,91 @@ EXTENDSTORY: add to another users' story instead of creating one
   > STRING content (what you're adding)
 > Output:
   > 0 if all ok
-  > 1 if user_id not an int
-  > 2 if story_id not an int
-  > 3 if user_id not found in user table
-  > 4 if story_id not found in story table
-  > 5 user already contributed to story
+  > 1 if content is empty
+  > 2 if user already contributed to story
 '''
 def extendStory(user_id, story_id, content):
     #solely for easier debugging
-    if not isinstance(user_id, (int, long)):
+    assert isinstance(user_id, (int, long)), "UserID not an int."
+    assert isinstance(story_id, (int, long)), "StoryID not an int."
+    assert isInDB( ("id", user_id) ), "UserID not found in DB."
+    assert isInDB( ("id", story_id), table="story" ), "StoryID not found in DB!"
+    if not content.strip():
         return 1
-    if not isinstance(story_id, (int, long)):
-        return 2
-
-    if not isInDB( ("id", user_id) ):
-        return 3
-    if not isInDB( ("id", story_id), table = "story" ):
-        return 4
 
     #checking if user has either created or added this story
     if isInDB(("story.user_id=%s OR extension.user_id"%user_id, user_id), \
               ("story.id=%s OR extension.story_id"%story_id, story_id), \
               table="story LEFT JOIN extension ON story.id = extension.story_id"):
-        return 5
+        return 2
 
     q = "INSERT INTO extension(story_id, user_id, content) VALUES (?,?,?);"
     c.execute(q, (story_id, user_id, content))
     conn.commit()
+
     return 0
 
 
-'''
-GETSTORYINFO: returns relevant info on a specific story
-> Input: INT story_id
-> Output: DEFAULTDICT (basically a dict) containg story info
-e.g.
-defaultdict(<type 'list'>, {'subtitle': u'smol', 'title': u'smol_title', 'content': u'smol', 'extensions': [{'content': u'yawk wuz hear', 'story_id': 2, 'user_id': 5, 'id': 1, 'create_ts': u'2016-11-06 22:01:59'}, {'content': u'go away yawk', 'story_id': 2, 'user_id': 2, 'id': 2, 'create_ts': u'2016-11-06 22:01:59'}], 'create_ts': u'2016-11-06 22:01:59', 'user_id': 3, 'id': 2})
 
 '''
+GETEXTENSIONINFO: returns relevant info about a specific extension
+> Input: INT extension_id
+> Output: DEFAULTDICT (basically a dict) containing extension info
+e.g. {
+       'id': 1, 
+       'user_id': 1, 
+       'story_id': 1, 
+       'content': "sample_extContent", 
+       'create_ts': "yyyy-mm-dd hh:mm:ss"
+     }
+'''
+def getExtensionInfo( extension_id ):
+    assert isInDB(("id", extension_id), table="extension"), "ExtensionID not found in DB!"
+    q = "SELECT * FROM extension WHERE id=?;"
+    extInfo_raw = c.execute(q, (extension_id,)).fetchone()
+    extColumns = ("id", "user_id", "story_id", "content", "create_ts")
+
+    #init values to list for cleaner code later
+    extInfo = defaultdict(lambda:1)
+
+    for i in xrange(len(extColumns)):
+        extInfo[extColumns[i]] = extInfo_raw[i]
+    return extInfo
+
+
+
+'''
+GETSTORYINFO: returns relevant info about a specific story
+> Input: INT story_id
+> Output: DEFAULTDICT (basically a dict) containing story info
+e.g. {
+       'user_id': 1, 
+       'id': 1, #this is the story id
+       'title': "sample_title", 
+       'subtitle': "sample_subtitle", 
+       'content': "sample_content", #beginning of story
+       'create_ts': "yyyy-mm-dd hh:mm:ss"
+       'extensions': 
+       [ <extension_id>, <extension_id>, ... ]
+     }
+
+>>> NOTE: Extensions are sorted in chronological order
+>>> NOTE: Story without extensions will not have an "extensions" key
+'''
 def getStoryInfo( story_id ):
-    assert isInDB( ("id",story_id), table="story" ), \
-        "Story ID not found in DB!"
+    assert isInDB( ("id",story_id), table="story" ), "Story ID not found in DB!"
     
-    #init values to list for cleaner code
+    #init values to list for cleaner code later
     storyInfo = defaultdict(list)
 
     q = '''
-    SELECT *
+    SELECT story.id, story.user_id, story.title, story.subtitle, \
+           story.content, story.create_ts, extension.id
     FROM story 
     LEFT JOIN extension
     ON story.id = extension.story_id 
-    WHERE story.id = ?;
+    WHERE story.id = ?
+    ORDER BY extension.create_ts;
     '''
     storyInfo_raw = c.execute(q, (story_id,))
 
@@ -188,35 +230,38 @@ def getStoryInfo( story_id ):
     for i in xrange(len(storyColumns)):
         storyInfo[storyColumns[i]] = sampleRow[i]
 
-    #now add all the extensions to LIST storyInfo["extensions"]
-    for row in c.execute(q, (story_id,)).fetchall():
-        extColumns = ("id", "user_id", "story_id", "content", "create_ts")
-        offset = len(storyColumns) #to offset the columns of row to actual ext info rather than story info
-        extInfo = defaultdict(lambda:1)
-        for i in xrange(len(extColumns)):
-            extInfo[extColumns[i]] = row[i + offset]
-        storyInfo["extensions"].append( extInfo )
+    if sampleRow[ len(storyColumns) ]: # if story actually has extensions
+        #add all the extension IDs to LIST storyInfo["extensions"]
+        for row in c.execute(q, (story_id,)).fetchall():
+            extension_id = row[ len(storyColumns) ] #row[6] should be extension_id column of joined table
+            storyInfo["extensions"].append( extension_id ) 
 
     return storyInfo
 
 
+
 '''
-GETCONTRIBUTEDPOSTS: returns relevant info on all stories that a user has either created or added to
+GETCONTRIBUTEDSTORIES: returns relevant info on all stories that a user has either created or added to in *chronological order*
 > Input: INT user_id
 > Output: [LIST of {DICTS, each representing a post}]
-e.g. [
-       {"title": "sample_title",
-        "subtitle": "sample_subtitle",
-        "creator": "",
-        "mostRecentPost", "{}"
-        }
-     ]
-> Note: mostRecentPost will not exist if story has no extensions
+e.g. [ <story_id>, <story_id>, ... ]
 '''
+def getContributedStories( user_id ):
+    assert isInDB( ("id",user_id) ), "UserID not found in DB!"
+    q = '''
+    SELECT story.id 
+    FROM story
+    LEFT JOIN extension
+    ON story.id = extension.story_id
+    WHERE ? IN (story.user_id, extension.user_id)
+    ORDER BY story.create_ts;
+    '''
+    return [ user_id[0] for user_id in c.execute(q, (user_id,)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
+    
 
 
 def debug():
-    #initial stuff
+    #init stuff
     q = "INSERT INTO user(username, password) VALUES(\"top\",\"kek\");"
     c.execute(q);
     q = "INSERT INTO user(username, password) VALUES(\"cop\",\"tech\");"
@@ -284,45 +329,60 @@ def debug():
 
     print "\nTESTING CREATESTORY..."
     try:
-        assert createStory("3", "a", "b", "c") == 1
-        assert createStory(3, "  ", "w", "w") == 2
-        assert createStory(3, "a", "b", "\t\n") == 3
+        assert createStory(3, "  ", "w", "w") == 1
+        assert createStory(3, "a", "b", "\t\n") == 2
         assert createStory(3, "title", "subtitle", "content") == 0
-        assert createStory(3, "title", "b", "c") == 4
+        assert createStory(3, "title", "b", "c") == 3
         assert createStory(getUserID("smol"), "smol_title", "smol", "smol") == 0
         assert createStory(getUserID("cop"), "no subtitle", "", "should work!") == 0
-        print "\t* Stories added to 'smol'(2) and 'cop'(1)"
+        print "\t* Stories just added to 'smol'(2) and 'cop'(1)"
     except AssertionError, e:
         print "\tmore errors asdfsasdf"
         raise
 
     print "\nTESTING EXTENDSTORY..."
-    print "\t%d (should be 1)" % extendStory("u",1,"c")
-    print "\t%d (should be 2)" % extendStory(1,"s","c")
-    print "\t%d (should be 3)" % extendStory(-1,2,"c")
-    print "\t%d (should be 4)" % extendStory(3,-1,"c")
-    print "\t%d (should be 5)" % extendStory(getUserID("smol"), 2, 1) #smol created story 1
+    print "\t%d (should be 1)" % extendStory(getUserID("top"), 2, "\t  \n")
+    print "\t%d (should be 2)" % extendStory(getUserID("smol"), 2, "smol wuz hear") #smol created story 1
     print "\t%d (should be 0)" % extendStory(getUserID("yawk"), 2, "yawk wuz hear")
-    print "\t* 'yawk' contributed to story 2 by smol"
-    print "\t%d (should be 5)" % extendStory(getUserID("yawk"), 2, "yawk already hear") #yawk just added to story 2
+    print "\t* 'yawk' just contributed to story 2 by smol"
+    print "\t%d (should be 2)" % extendStory(getUserID("yawk"), 2, "yawk already hear") #yawk just added to story 2
     print "\t%d (should be 0)" % extendStory( getUserID("cop"), 2, "go away yawk")
-    print "\t* 'cop' contributed to story 2 by smol"
+    print "\t* 'cop' just contributed to story 2 by smol"
 
     print "\nTESTING GETSTORYINFO..."
-    getStoryInfo(1)
-    getStoryInfo(2)
+    pprint( dict(getStoryInfo(1)) )
+    pprint( dict(getStoryInfo(2)) )
     try:
-        getStoryInfo(-1)
+        pprint( dict(getStoryInfo(-1)) )
         print "\tTHIS SHOULD NOT HAVE WORKED"
     except AssertionError, e:
         print "\tThrew an AssertionError (intended)"
 
+    print "\nTESTING GETEXTENSIONINFO..."
+    pprint( dict(getExtensionInfo(1)) )
+    pprint( dict(getExtensionInfo(2)) )
+    try:
+        pprint( dict(getExtensionInfo(-1)) )
+        print "\tTHIS SHOULD NOT HAVE WORKED"
+    except AssertionError, e:
+        print "* Threw an AssertionError (intended)"
 
-    print "\nPRINTING USERS..."
+    print "\nTESTING GETCONTRIBUTEDSTORIES..."
+    print "\tbloggo's stories: " + str(getContributedStories( getUserID("bloggos") ))
+    print "\tcop's stories: " + str(getContributedStories( getUserID("cop") ))
+    print "\tsmol's stories: " + str(getContributedStories( getUserID("smol") ))
+    try:
+        getContributedStories(-1)
+        print "\t*** THIS SHOULD NOT HAVE RUN ***"
+    except AssertionError, e:
+        print "* Threw an AssertionError (intended)"
+
+
+    print "\nPRINTING USER TABLE..."
     printTable("user")
-    print "\nPRINTING STORIES..."
+    print "\nPRINTING STORY TABLE..."
     printTable("story")
-    print "\nPRINTING EXTENSIONS..."
+    print "\nPRINTING EXTENSION TABLE..."
     printTable("extension")
 
 

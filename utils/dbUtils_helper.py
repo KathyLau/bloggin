@@ -2,9 +2,10 @@ import sqlite3
 from pprint import pprint
 from collections import defaultdict
 
-#mutliple conns supported by sqlite3!
+#I verified multiple conns are supported by sqlite3 :)
 conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
 c = conn.cursor()
+
 
 def setup():
     q = '''
@@ -51,7 +52,9 @@ ISINDB: tests if row exists in db file
 #readability kinda went out the window for this one
 #throws error if column name doesn't exist
 def isInDB(*columns,**table):return True if c.execute("SELECT 1 FROM %s WHERE %s LIMIT 1;"%(table["table"]if table else"user",reduce((lambda c1,c2:"(%s) AND (%s)"%("%s=\"%s\""%(columns[0][0],columns[0][1])if isinstance(c1,tuple)else c1,"%s=%s"%(c2[0],c2[1]))),columns)if len(columns)-1 else"%s=\"%s\""%(columns[0][0],columns[0][1]))).fetchone() else False
+
 '''
+# For easier reading: ...
 def isInDB(*columns,**table):
     table = table["table"] if table else "user"
     if len(columns)-1:
