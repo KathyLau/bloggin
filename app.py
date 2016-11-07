@@ -13,15 +13,14 @@ dbUtils.setup()
 def home():
     if "user" in session:
         return redirect(url_for("yourstories"))
-    else:
-        return redirect(url_for("login"))
+    return redirect(url_for("login"))
 
 
     
 @app.route("/<username>/<postID>", methods=["GET","POST"])
 def viewPost(username, postID):
-    if "user" not in session:
-        return redirect( url_for("/") )
+    if assertionStuff() is not None:
+        return assertionStuff()
     userID = dbUtils.getUserID(username)
     
     extra = ""
@@ -42,8 +41,8 @@ def viewPost(username, postID):
 
 @app.route("/find")
 def find():
-    if "user" not in session:
-        return redirect( url_for("/") )
+    if assertionStuff() is not None:
+        return assertionStuff()
     user = session["user"]
     userID = dbUtils.getUserID(user)
     notContributed = dbUtils.getNonContributedStories(userID)[::-1][:5] #reverse first 5 chrono order
@@ -59,9 +58,8 @@ def find():
 
 @app.route("/yourstories")
 def yourstories():
-    if "user" not in session:
-        return redirect( url_for("/") )
-
+    if assertionStuff() is not None:
+        return assertionStuff()
     user = session["user"]
     userID = dbUtils.getUserID(user)
     contributed = dbUtils.getContributedStories(userID)[::-1][:5] #first 5 after reversed for rev chrono order
@@ -117,27 +115,24 @@ def reg():
         
 @app.route("/logout")
 def logout():
-    if "user" not in session:
-        return redirect( url_for("/") )
     session.pop("user")
-    return render_template("login.html")
+    return redirect("/")
 
 @app.route("/new", methods=["GET", "POST"])
 def create():
-    if "user" in session:
-        if request.method== "GET":
-            return render_template("create.html", username=session["user"])
-        else:
-            post = request.form["post"]
-            title = request.form["title"]
-            sub = request.form["subtitle"]
-            user = session["user"]
-            userID = dbUtils.getUserID(user)
-            #SQL work
-            dbUtils.createStory(userID, title, sub, post)
-            return redirect(url_for("yourstories"))
+    if assertionStuff() is not None:
+        return assertionStuff()
+    if request.method== "GET":
+        return render_template("create.html", username=session["user"])
     else:
-        return redirect(url_for("/"))
+        post = request.form["post"]
+        title = request.form["title"]
+        sub = request.form["subtitle"]
+        user = session["user"]
+        userID = dbUtils.getUserID(user)
+        #SQL work
+        dbUtils.createStory(userID, title, sub, post)
+        return redirect(url_for("yourstories"))
         
 
 def getFormattedDate( timestamp ):
@@ -147,10 +142,17 @@ def getFormattedDate( timestamp ):
         month = int(dateList[1]), 
         year = int(dateList[0]),
     ).strftime('%B %d, %Y')
-
     timeString = timestamp[timestamp.find(" ")+1:][:-3]
-
     return "%s\n%s" % (dateString, timeString)
+
+
+def assertionStuff():
+    if "user" not in session:
+        return redirect( "/" )
+    try:
+        dbUtils.getUserID( session["user"] )
+    except AssertionError, e:
+        return redirect( "/logout" )
 
 
 if __name__=="__main__":
