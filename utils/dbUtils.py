@@ -14,29 +14,25 @@ Recently added fxns in chrono order:
 ! getStoryInfo (also this)
 '''
 
-
 import sqlite3
 import dbUtils_helper as helper
 from collections import defaultdict
 from pprint import pprint
 import os
 
-conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
-c = conn.cursor()
-
+conn = c = None #initialied in initConnection()
 
 
 '''
-UPDATEPATHDB: change which DB is being accessed
+initConnection: initiate connection w/ db
 > Input: STRING path to db
->>> NOTE: Intended use: change after importing this module
+>>> NOTE: must run before using any method here
 '''
-def updatePathDB(path):
+def initConnection(path):
     global conn, c
-    conn.close()
     conn = sqlite3.connect(path, check_same_thread=False)
-    helper.conn = conn
     c = conn.cursor()
+    helper.initConnection(path) #this is super messy, but necessary (im p sure)
 
 
 
@@ -401,6 +397,7 @@ def debug():
 
     
 if __name__ == "__main__":
+    initConnection("data/tabular.db")
     if 'user' not in helper.getTables():
         helper.setup()
     debug()

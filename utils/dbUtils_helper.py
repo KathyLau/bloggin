@@ -1,11 +1,23 @@
 import sqlite3
 from pprint import pprint
 
-#I verified multiple conns are supported by sqlite3 :)
-conn = sqlite3.connect('data/tabular.db', check_same_thread=False)
-c = conn.cursor()
+conn = c = None #initialized in initConnection
 
 
+'''
+initConnection: initiate connection w/ db
+> Input: STRING path to db
+>>> NOTE: must run before using any method here
+'''
+def initConnection(path):
+    global conn, c
+    conn = sqlite3.connect(path, check_same_thread=False)
+    c = conn.cursor()
+
+
+'''
+SETUP: sets up tables (if db is empty)
+'''
 def setup():
     q = '''
     CREATE TABLE user (
@@ -55,7 +67,6 @@ def isInDB(*columns,**table):return True if c.execute("SELECT 1 FROM %s WHERE %s
 # For easier reading: ...
 '''
 def isInDB(*columns,**table):
-
     table = table["table"] if table else "user"
 
     if len(columns)-1:

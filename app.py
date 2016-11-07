@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import utils.dbUtils, hashlib 
 
 app = Flask(__name__)
-utils.dbUtils.updatePathDB("data/tabular.db")
+utils.dbUtils.initConnection("data/tabular.db")
 
 
 @app.route("/")
