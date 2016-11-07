@@ -20,16 +20,19 @@ def viewPost(username, postID):
 
 @app.route("/find")
 def find():
-    story = utils.dbUtils.getStoryInfo(postID)
-    extensions = story['extensions']
-    return render_template("multipleposts.html", post=story, extensions=extensions, username=session['user'])
+    user = session["user"]
+    userID = utils.dbUtils.getUserID(user)
+    notContributed = utils.dbUtils.getNotYourStories(userID)
+    posts = []
+    for item in notContributed:
+        posts.append(utils.dbUtils.getStoryInfo(item))
+    return render_template("multipleposts.html", postlist=posts, username=user)
 
 @app.route("/yourstories")
 def yourstories():
     user = session["user"]
     userID = utils.dbUtils.getUserID(user)
     contributed = utils.dbUtils.getContributedStories(userID)
-
     posts = []
     for item in contributed:
         posts.append(utils.dbUtils.getStoryInfo(item))
