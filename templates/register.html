@@ -51,12 +51,17 @@
 	    <p>Password:<input name="pass" type="password"></p>
 
 	    <p>Confirm Password:<input name="confirm" type="password"></p>
+	    <input id="hiddenpic" type="hidden" name="pic" visible="hidden">
+	    
+	    <div style="text-align:center;">
+	      <canvas id="doodle" data-processing-sources="/static/ps/doodle.pde"></canvas>
+	    </div>
 	    
 	    <footer>
 	      
 	      <ul class="actions">
 		
-		<li><input type="submit" name="submit" value="Sign Up"></li>
+		<li><input type="submit" name="submit" value="Sign Up" onclick="addURL()"></li>
 		
 	      </ul>
 	      
@@ -71,16 +76,19 @@
     </div>
 
     <!-- Scripts -->
+    <script src="/static/js/processing.min.js"></script>
+
+    <script src="/static/js/senddoodle.js"></script>
     
-    <script src="static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
     
-    <script src="static/js/skel.min.js"></script>
+    <script src="/static/js/skel.min.js"></script>
     
-    <script src="static/js/util.js"></script>
+    <script src="/static/js/util.js"></script>
     
     <!--[if lte IE 8]><script src="static/js/ie/respond.min.js"></script><![endif]-->
     
-    <script src="static/js/main.js"></script>
+    <script src="/static/js/main.js"></script>
     
   </body>
   

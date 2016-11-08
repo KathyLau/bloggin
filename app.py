@@ -124,7 +124,7 @@ def reg():
             dbUtils.addUser(user, pwd)
             session["user"] = user
             return redirect(url_for("home"))
-        return redirect(url_for("login"))
+        return render_template("register.html")
 
 
         
