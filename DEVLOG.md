@@ -52,10 +52,12 @@
 - William: extendStory, getStoryInfo, isInDB rehaul
 - Daniel: wrote /find html as well as fixed errors with urls for static. Also wrote app.py function for loading urls and made the /edit site links usable.
 - Kelly: linked database and /yourStories, wrote viewPost, finished /find.
+- Kathy: finalized plan for the night. Found bug next morning but resolved with William.
 ===
 
 ### 11/7 Home ( POST DUE DATE )
 - Daniel: Made pagination on posts work and also made a system to doodle profile pictures
+- Kathy: added Pixel profile pics js code and comments on app.py
 
 # STILL NEED TO DO
 
