@@ -1,6 +1,11 @@
 # Collab Story Builder
 
 by Kathy, Daniel, Kelly, William (Period 8)
+### Cool Features
+* User profile picture customization
+* Pagination
+
+### General
 
 * Users will have to register to use the site.
 * Logged in users can either start a new story or add to an existing story.
