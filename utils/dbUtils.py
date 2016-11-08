@@ -58,7 +58,8 @@ def setup():
         title TEXT,
         subtitle TEXT,
         content TEXT,
-        create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+        author_pic TEXT
+        create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         );
         '''
         c.execute(q)
@@ -183,8 +184,12 @@ def createStory(user_id, title, subtitle, content):
         return 2
     if helper.isInDB( ("user_id",user_id), ("title",title), table="story"):
         return 3
-    q = "INSERT INTO story(user_id, title, subtitle, content) VALUES(?,?,?,?)"
-    c.execute(q, (user_id, title, subtitle, content))
+    q = "SELECT pfp FROM user WHERE id = ?"
+    print user_id
+    c.execute(q, (user_id,))
+    pfpString = c.fetchone()[0]
+    q = "INSERT INTO story(user_id, title, subtitle, content, author_pic) VALUES(?,?,?,?,?)"
+    c.execute(q, (user_id, title, subtitle, content, pfpString))
     conn.commit()
     return 0
 
@@ -277,7 +282,7 @@ def getStoryInfo( story_id ):
     storyInfo = defaultdict(list)
 
     q = '''
-    SELECT story.id, story.user_id, story.title, story.subtitle, \
+    SELECT story.id, story.user_id, story.author_pic, story.title, story.subtitle, \
            story.content, story.create_ts, extension.id
     FROM story 
     LEFT JOIN extension
@@ -288,7 +293,7 @@ def getStoryInfo( story_id ):
     storyInfo_raw = c.execute(q, (story_id,))
 
     sampleRow = storyInfo_raw.fetchone() #for general story info
-    storyColumns = ("id", "user_id", "title", "subtitle", "content", "create_ts")
+    storyColumns = ("id", "user_id", "author_pic","title", "subtitle", "content", "create_ts")
     for i in xrange(len(storyColumns)):
         storyInfo[storyColumns[i]] = sampleRow[i]
 
