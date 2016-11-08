@@ -147,7 +147,7 @@ def create():
         userID = dbUtils.getUserID(user)
         #SQL work
         dbUtils.createStory(userID, title, sub, post)
-        return redirect(url_for("yourstories/0", page=1, maxpage = getMaxPage() ))
+        return redirect(url_for("yourstories", page=1, maxpage = getMaxPage() ))
         
 
 def getFormattedDate( timestamp ):
