@@ -50,7 +50,7 @@ def setup():
         );
         '''
         c.execute(q)
-        
+
         q = '''
         CREATE TABLE story (
         id INTEGER PRIMARY KEY,
@@ -58,12 +58,12 @@ def setup():
         title TEXT,
         subtitle TEXT,
         content TEXT,
-        author_pic TEXT
-        create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        author_pic TEXT,
+        create_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
         );
         '''
         c.execute(q)
-        
+
         q = '''
         CREATE TABLE extension (
         id INTEGER PRIMARY KEY,
@@ -75,7 +75,7 @@ def setup():
         '''
         c.execute(q)
         conn.commit()
-        
+
 
 
 '''
@@ -197,7 +197,7 @@ def createStory(user_id, title, subtitle, content):
 
 '''
 EXTENDSTORY: add to another users' story instead of creating one
-> Input: 
+> Input:
   > INT story_id (which story you're adding to)
   > INT user_id (YOUR user ID)
   > STRING content (what you're adding)
@@ -233,11 +233,11 @@ GETEXTENSIONINFO: returns relevant info about a specific extension
 > Input: INT extension_id
 > Output: DEFAULTDICT (basically a dict) containing extension info
 e.g. {
-       'id': 1, 
+       'id': 1,
        'user_id': 1,
        'author': "John Doe"
-       'story_id': 1, 
-       'content': "sample_extContent", 
+       'story_id': 1,
+       'content': "sample_extContent",
        'create_ts': "yyyy-mm-dd hh:mm:ss"
      }
 '''
@@ -262,13 +262,13 @@ GETSTORYINFO: returns relevant info about a specific story
 > Input: INT story_id
 > Output: DEFAULTDICT (basically a dict) containing story info
 e.g. {
-       'user_id': 1, 
+       'user_id': 1,
        'id': 1, #this is the story id
-       'title': "sample_title", 
-       'subtitle': "sample_subtitle", 
+       'title': "sample_title",
+       'subtitle': "sample_subtitle",
        'content': "sample_content", #beginning of story
        'create_ts': "yyyy-mm-dd hh:mm:ss"
-       'extensions': 
+       'extensions':
        [ <extension_id>, <extension_id>, ... ]
      }
 
@@ -277,16 +277,16 @@ e.g. {
 '''
 def getStoryInfo( story_id ):
     assert helper.isInDB( ("id",story_id), table="story" ), "Story ID not found in DB!"
-    
+
     #init values to list for cleaner code later
     storyInfo = defaultdict(list)
 
     q = '''
     SELECT story.id, story.user_id, story.author_pic, story.title, story.subtitle, \
            story.content, story.create_ts, extension.id
-    FROM story 
+    FROM story
     LEFT JOIN extension
-    ON story.id = extension.story_id 
+    ON story.id = extension.story_id
     WHERE story.id = ?
     ORDER BY extension.create_ts;
     '''
@@ -301,7 +301,7 @@ def getStoryInfo( story_id ):
         #add all the extension IDs to LIST storyInfo["extensions"]
         for row in c.execute(q, (story_id,)).fetchall():
             extension_id = row[ len(storyColumns) ] #row[6] should be extension_id column of joined table
-            storyInfo["extensions"].append( extension_id ) 
+            storyInfo["extensions"].append( extension_id )
 
     storyInfo["author"] = getUsername( storyInfo["user_id"] )
     return storyInfo
@@ -329,7 +329,7 @@ def getContributedStories( user_id ):
     return [ user_id[0] for user_id in c.execute(q, (user_id,)).fetchall() ] #b/c fetchall puts the data in annoying tuple form
 
 
-    
+
 '''
 GETNONCONTRIBUTEDSTORIES: returns info on all stories user has NOT created or added to, in *chronological order*
 > Input: INT user_id
@@ -338,7 +338,7 @@ e.g. [ <story_id>, <story_id>, ... ]
 '''
 def getNonContributedStories( user_id ):
     assert helper.isInDB( ("id",user_id) ), "UserID not found in DB!"
-    
+
     q = '''
     SELECT DISTINCT story.id
     FROM story
@@ -389,7 +389,7 @@ def debug():
     except AssertionError, e:
         print "\t ERRORS!!!"
         raise
-    
+
     print "\nTESTING ADDUSER..."
     try:
         addUser("smol", "bloggos")
@@ -417,7 +417,7 @@ def debug():
     except AssertionError, e:
         print "\to no didnt expect this one"
         raise
-        
+
 
     print "\nTESTING CREATESTORY..."
     try:
