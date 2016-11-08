@@ -45,7 +45,8 @@ def setup():
         CREATE TABLE user (
         id INTEGER PRIMARY KEY,
         username VARCHAR(50) UNIQUE,
-        password VARCHAR(50)
+        password VARCHAR(50),
+        pfp TEXT
         );
         '''
         c.execute(q)
@@ -153,10 +154,10 @@ ADDUSER: Adds user to db
 > Input: STRING username, STRING password (should be hashed by now!)
 >>> NOTE: not returning anything b/c should have already verified everything in registerAuth()
 '''
-def addUser(username, password):
+def addUser(username, password, pic):
     assert not helper.isInDB( ("username",username) ), "*** TRIED TO ADD USER THAT ALREADY EXISTS ***"
-    q = "INSERT INTO user(username, password) VALUES(?,?)"
-    c.execute(q, (username, password))
+    q = "INSERT INTO user(username, password, pfp) VALUES(?,?,?)"
+    c.execute(q, (username, password, pic))
     conn.commit()
 
 

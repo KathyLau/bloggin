@@ -17,7 +17,7 @@ def getMaxPage():
 @app.route("/")
 def home():
     if "user" in session:
-        return redirect(url_for("yourstories", page=1, maxpage = getMaxPage()))
+        return redirect(url_for("yourstories", page=1))
     return redirect(url_for("login"))
 
 
@@ -117,11 +117,12 @@ def reg():
         user = request.form["user"]
         pwd = request.form["pass"]
         confirm = request.form["confirm"]
+        pic = request.form["pic"]
         if dbUtils.registerAuth(user, pwd, confirm) == 0:
             hashObj = hashlib.sha1()
             hashObj.update(pwd)
             pwd = hashObj.hexdigest()
-            dbUtils.addUser(user, pwd)
+            dbUtils.addUser(user, pwd, pic)
             session["user"] = user
             return redirect(url_for("home"))
         return render_template("register.html")
