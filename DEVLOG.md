@@ -54,6 +54,9 @@
 - Kelly: linked database and /yourStories, wrote viewPost, finished /find.
 ===
 
+### 11/7 Home ( POST DUE DATE )
+- Daniel: Made pagination on posts work and also made a system to doodle profile pictures
+
 # STILL NEED TO DO
 
 - [x] test
