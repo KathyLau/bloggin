@@ -44,8 +44,17 @@
 
   <!-- Pagination -->
   <ul class="actions pagination">
-    <li><a href="" class="disabled button big previous">Previous Page</a></li>
-    <li><a href="#" class="button big next">Next Page</a></li>
+    {% if page > 1 %}
+    <li><a href="{{page - 1}}" class= "button big previous">Previous Page</a></li>
+    {% else %}
+    <li><a href="{{page - 1}}" class= "button big previous disabled">Previous Page</a></li>
+    {% endif %}
+    
+    {% if page < maxpage %} 
+    <li><a href="{{page + 1}}" class="button big next">Next Page</a></li>
+    {% else %}
+    <li><a href="{{page + 1}}" class="button big next disabled">Next Page</a></li>
+    {% endif %}
   </ul>
 
 </div>

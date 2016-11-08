@@ -7,12 +7,17 @@ app = Flask(__name__)
 dbUtils.initConnection("data/tabular.db")
 dbUtils.setup()
 
-
+def getMaxPage():
+    user = session["user"]
+    userID = dbUtils.getUserID(user)
+    contributed = dbUtils.getContributedStories(userID)
+    numposts = len(contributed)
+    return numposts/5 + 1
 
 @app.route("/")
 def home():
     if "user" in session:
-        return redirect(url_for("yourstories"))
+        return redirect(url_for("yourstories", page=1, maxpage = getMaxPage()))
     return redirect(url_for("login"))
 
 
@@ -39,13 +44,18 @@ def viewPost(username, postID):
             
 
 
-@app.route("/find")
-def find():
+@app.route("/find/<int:page>")
+def find(page):
     if assertionStuff() is not None:
         return assertionStuff()
     user = session["user"]
     userID = dbUtils.getUserID(user)
-    notContributed = dbUtils.getNonContributedStories(userID)[::-1][:5] #reverse first 5 chrono order
+    notContributed = dbUtils.getNonContributedStories(userID)
+    numposts = len(notContributed)
+    if page >=0 and page <= numposts / 5 + 1:
+        notContributed = notContributed[::-1][5 * (page-1):5 * page] #reverse first 5 chrono order
+    else:
+        return redirect(url_for("find", page=1))
     posts = []
     for i in range( len(notContributed) ):
         posts.append(dbUtils.getStoryInfo( notContributed[i] ))
@@ -53,16 +63,21 @@ def find():
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
     
-    return render_template("multipleposts.html", postlist=posts, username=user, explore=1)
+    return render_template("multipleposts.html", postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
 
 
-@app.route("/yourstories")
-def yourstories():
+@app.route("/yourstories/<int:page>")
+def yourstories(page):
     if assertionStuff() is not None:
         return assertionStuff()
     user = session["user"]
     userID = dbUtils.getUserID(user)
-    contributed = dbUtils.getContributedStories(userID)[::-1][:5] #first 5 after reversed for rev chrono order
+    contributed = dbUtils.getContributedStories(userID)
+    numposts = len(contributed)
+    if page >= 1 and page <= numposts / 5 + 1:
+        contributed = contributed[::-1][5 * (page-1):5 * page] #reverse first 5 chrono order
+    else:
+        return redirect(url_for("yourstories", page=1))
     posts = []
     for i in range( len(contributed) ):
         posts.append(dbUtils.getStoryInfo( contributed[i] ))
@@ -70,7 +85,7 @@ def yourstories():
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
 
-    return render_template("multipleposts.html", postlist=posts[:5], username=session['user'])
+    return render_template("multipleposts.html", postlist=posts[:5], username=session['user'], page = page, maxpage=numposts/5+1)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -132,7 +147,7 @@ def create():
         userID = dbUtils.getUserID(user)
         #SQL work
         dbUtils.createStory(userID, title, sub, post)
-        return redirect(url_for("yourstories"))
+        return redirect(url_for("yourstories", page=1, maxpage = getMaxPage() ))
         
 
 def getFormattedDate( timestamp ):
