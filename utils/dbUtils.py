@@ -89,6 +89,15 @@ def getUserID(username):
     return c.execute(q, (username,)).fetchone()[0] #should be user_id
 
 
+'''
+GETUSERPIC: get picture for a given username
+> Input: STRING userID
+> Output: STRING pic
+'''
+def getUserPic(user_id):
+    assert isinstance(user_id, (int, long)) and helper.isInDB( ("id", user_id) )
+    q = "SELECT pfp FROM user WHERE id=? LIMIT 1;"
+    return c.execute(q, (user_id,)).fetchone()[0]
 
 '''
 GETUSERNAME: get a user's username given ID

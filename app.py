@@ -21,7 +21,31 @@ def home():
         return redirect(url_for("yourstories", page=1))
     return redirect(url_for("login"))
 
-
+#account pages
+@app.route("/<username>")
+def account(username):
+    if assertionStuff() is not None:
+        return assertionStuff()
+    try:
+        accountId = dbUtils.getUserID(username)
+    except Exception:
+        return redirect(url_for("yourstories", page=1))
+    #user = session["user"]
+    #userID = dbUtils.getUserID(user) #get user id
+    contributed = dbUtils.getContributedStories(accountId)
+    #contributed = dbUtils.getContributedStories(userID) #get stories
+    numposts = len(contributed)
+    contributed = contributed[::-1] #reverse first 5 chrono order
+    posts = []
+    for i in range( len(contributed) ):
+        posts.append(dbUtils.getStoryInfo( contributed[i] ))
+        posts[i]["create_ts"] = getFormattedDate( posts[i]["create_ts"] )
+        for j in range( len(posts[i]["extensions"]) ): #expand extensions
+            posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
+    accountPic = dbUtils.getUserPic(accountId)
+    return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username)
+    
+    
 #lands on this page after you click continue reading
 @app.route("/<username>/<postID>", methods=["GET","POST"])
 def viewPost(username, postID):
@@ -61,8 +85,6 @@ def find(page):
     for i in range( len(notContributed) ):
         posts.append(dbUtils.getStoryInfo( notContributed[i] ))
         posts[i]["create_ts"] = getFormattedDate( posts[i]["create_ts"] )
-        for j in range( len(posts[i]["extensions"]) ): #expand extensions
-            posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
 
     return render_template("multipleposts.html", postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
 
