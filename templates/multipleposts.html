@@ -15,17 +15,15 @@
       </div>
       <div class="meta">
 	<time class="published">{{ post["create_ts"] }}</time>
-	<a href={{"/"~post['author']}} class="author"><span class="name">{{ post [ 'author' ] }}</span><img src={{ post ['author_pic'] }} alt="" /></a>
+	<a href="{{"/"~post['author']}}" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src={{ post ['author_pic'] }} alt="" /></a>
       </div>
     </header>
     <p> 
-
-        {% if post["extensions"] %}
-          {{ post["extensions"][-1]["content"] }}
-        {% else %}
-          {{ post["content"] }}
-        {% endif %}
-      
+      {% if post["extensions"] %}
+      {{ post["extensions"][-1]["content"] }}
+      {% else %}
+      {{ post["content"] }}
+      {% endif %}
     </p>
     <footer>
       <ul class="actions">
