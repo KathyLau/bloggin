@@ -35,7 +35,7 @@ def initConnection(path):
     helper.initConnection(path) #this is super messy, but necessary (im p sure)
 
 
-    
+
 '''
 SETUP: sets up tables (if db is empty)
 '''
@@ -117,7 +117,7 @@ def censor(username):
         q = "UPDATE story SET author_pic = ? WHERE id = ?"
         c.execute(q, (banImage, poisonedstory[0]))
     conn.commit()
-    
+
 '''
 GETUSERNAME: get a user's username given ID
 > Input: INT user_id
@@ -345,6 +345,16 @@ def getSearchResults( query ):
     q = 'SELECT id FROM story WHERE instr(lower(title), ?) > 0 OR instr(lower(subtitle), ?) > 0 OR instr(lower(content), ?) > 0;'
     stories = c.execute(q, (query, query, query)).fetchall()
     return stories
+
+'''
+GETCOUNTUSERS()
+Input: None
+Output: Num of registered users
+'''
+def getCountUsers():
+    q = 'SELECT COUNT (*) FROM user;'
+    num = c.execute(q).fetchone()
+    return num
 
 
 '''

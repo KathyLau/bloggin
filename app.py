@@ -45,7 +45,8 @@ def account(username):
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
     accountPic = dbUtils.getUserPic(accountId)
-    return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username)
+    numUsers = dbUtils.getCountUsers()[0]
+    return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username, count=numUsers)
 
 
 #search results
@@ -67,9 +68,10 @@ def search():
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
     maxposts = len(posts)/5 + 1
-    return render_template("multipleposts.html", postlist=posts, username=session['user'], page=1, maxpage=maxposts)
+    numUsers = dbUtils.getCountUsers()[0]
+    return render_template("multipleposts.html", count=numUsers, postlist=posts, username=session['user'], page=1, maxpage=maxposts)
 
-    
+
 #lands on this page after you click continue reading
 @app.route("/<username>/<postID>", methods=["GET","POST"])
 def viewPost(username, postID):
@@ -89,7 +91,8 @@ def viewPost(username, postID):
     story["create_ts"] = getFormattedDate( story["create_ts"])
 
     hasContributed = int(postID) in dbUtils.getContributedStories(userID)
-    return render_template("single.html", post=story, extensions=extensions, username=session['user'], extra=extra, hasContributed=hasContributed)
+    numUsers = dbUtils.getCountUsers()[0]
+    return render_template("single.html", post=story, count=numUsers, extensions=extensions, username=session['user'], extra=extra, hasContributed=hasContributed)
 
 @app.route("/find/<int:page>")
 def find(page):
@@ -109,8 +112,8 @@ def find(page):
         posts[i]["create_ts"] = getFormattedDate( posts[i]["create_ts"] )
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
-            
-    return render_template("multipleposts.html", postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
+    numUsers = dbUtils.getCountUsers()[0]
+    return render_template("multipleposts.html", count=numUsers, postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
 
 #view stories you created or contributed to
 # / page number starts on 1, loads 5 stories per page
@@ -133,7 +136,8 @@ def yourstories(page):
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
 
-    return render_template("multipleposts.html", postlist=posts[:5], username=session['user'], page = page, maxpage=numposts/5+1)
+    numUsers = dbUtils.getCountUsers()[0]
+    return render_template("multipleposts.html", count=numUsers, postlist=posts[:5], username=session['user'], page = page, maxpage=numposts/5+1)
 
 
 #login for regusted users
@@ -193,7 +197,8 @@ def create():
     if assertionStuff() is not None:
         return assertionStuff()
     if request.method== "GET":
-        return render_template("create.html", username=session["user"])
+        numUsers = dbUtils.getCountUsers()[0]
+        return render_template("create.html", count=numUsers, username=session["user"])
     else:
         #getting data from form
         post = request.form["post"]
@@ -203,7 +208,8 @@ def create():
         userID = dbUtils.getUserID(user)
         #SQL work
         dbUtils.createStory(userID, title, sub, post)
-        return redirect(url_for("yourstories", page=1, maxpage = getMaxPage() ))
+        numUsers = dbUtils.getCountUsers()[0]
+        return redirect(url_for("yourstories", count=numUsers, page=1, maxpage = getMaxPage() ))
 
 
 #format date and timestamp from timestamp in sql table

@@ -18,14 +18,14 @@
 	<a href="#" class="author"><span class="name">{{ post [ 'author' ] }}</span><img src={{ post ['author_pic'] }} alt="" /></a>
       </div>
     </header>
-    <p> 
+    <p>
 
         {% if post["extensions"] %}
           {{ post["extensions"][-1]["content"] }}
         {% else %}
           {{ post["content"] }}
         {% endif %}
-      
+
     </p>
     <footer>
       <ul class="actions">
@@ -33,6 +33,7 @@
       </ul>
 
       <ul class="stats">
+
 	<li><a href="#">General</a></li>
 	<li><a href="#" class="icon fa-heart">420</a></li>
 	<li><a href="#" class="icon fa-comment">1337</a></li>
