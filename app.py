@@ -57,7 +57,7 @@ def search():
         query = request.form.get("query")
     else:
         return redirect(url_for("yourstories", page=1))
-    contributed = getSearchResults(query)
+    contributed = dbUtils.getSearchResults(query)
     numposts = len(contributed)
     contributed = contributed[::-1] #reverse first 5 chrono order
     posts = []
