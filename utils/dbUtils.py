@@ -334,6 +334,17 @@ def getStoryInfo( story_id ):
     storyInfo["author"] = getUsername( storyInfo["user_id"] )
     return storyInfo
 
+'''
+GETSEARCHRESULTS(QUERY)
+Input: String query
+Output: dict-type thing
+--mostly stolen from dubbx--
+'''
+def getSearchResults( query ):
+    posts = []
+    q = 'SELECT id FROM story WHERE instr(lower(title), ?) > 0 OR instr(lower(subtitle), ?) > 0 OR instr(lower(content), ?) > 0;'
+    stories = c.execute(q, (query, query, query)).fetchall()
+    return stories
 
 
 '''

@@ -62,12 +62,12 @@ def search():
     contributed = contributed[::-1] #reverse first 5 chrono order
     posts = []
     for i in range( len(contributed) ):
-        posts.append(dbUtils.getStoryInfo( contributed[i] ))
+        posts.append(dbUtils.getStoryInfo( contributed[i][0]))
         posts[i]["create_ts"] = getFormattedDate( posts[i]["create_ts"] )
         for j in range( len(posts[i]["extensions"]) ): #expand extensions
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
-    accountPic = dbUtils.getUserPic(accountId)
-    return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username)
+    maxposts = len(posts)/5 + 1
+    return render_template("multipleposts.html", postlist=posts, username=session['user'], page=1, maxpage=maxposts)
 
     
 #lands on this page after you click continue reading
