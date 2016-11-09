@@ -35,7 +35,7 @@ def initConnection(path):
     helper.initConnection(path) #this is super messy, but necessary (im p sure)
 
 
-
+    
 '''
 SETUP: sets up tables (if db is empty)
 '''
@@ -99,6 +99,25 @@ def getUserPic(user_id):
     q = "SELECT pfp FROM user WHERE id=? LIMIT 1;"
     return c.execute(q, (user_id,)).fetchone()[0]
 
+'''
+CENSOR FUNCTION FOR GROSS PICS
+>Input: STRING USERNAME
+'''
+def censor(username):
+    conn = sqlite3.connect("data/tabular.db")
+    c = conn.cursor()
+    user_id = int(c.execute("SELECT id FROM user WHERE username=?", (username,)).fetchone()[0])
+    q = "SELECT pfp FROM user WHERE username=\"admin\""
+    banImage = c.execute(q).fetchone()[0]
+    q = "UPDATE user SET pfp=? WHERE username=?"
+    c.execute(q, (banImage, username))
+    q = "SELECT id FROM story WHERE user_id=?"
+    stories = c.execute(q, (user_id,)).fetchall()
+    for poisonedstory in stories:
+        q = "UPDATE story SET author_pic = ? WHERE id = ?"
+        c.execute(q, (banImage, poisonedstory[0]))
+    conn.commit()
+    
 '''
 GETUSERNAME: get a user's username given ID
 > Input: INT user_id

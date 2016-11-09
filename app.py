@@ -209,6 +209,6 @@ def assertionStuff():
 
 
 if __name__=="__main__":
-    app.debug = True
+    app.debug = False
     app.secret_key = "dogs are qool"
     app.run()
