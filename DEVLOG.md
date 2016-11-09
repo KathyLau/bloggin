@@ -58,7 +58,10 @@
 ### 11/7 Home ( POST DUE DATE )
 - Daniel: Made pagination on posts work and also made a system to doodle profile pictures
 - Kathy: added Pixel profile pics js code and comments on app.py
-
+===
+### 11/8 Home (POST DUE DATE )
+- Daniel: making search
+- Kathy: debugged sql table so author pic can be stored correctly
 # STILL NEED TO DO
 
 - [x] test
