@@ -45,6 +45,15 @@
 	  </header>
 	  
 	  <form method="POST" action="/register">
+	    <br>
+	    <div style="text-align:center;">
+	      <h2>Draw your profile picture here</h2>
+	      <br>
+	      <canvas id="doodle" data-processing-sources="/static/ps/doodle.pde"></canvas>
+	      <br><br>
+	      <h4>(mouse over the four corners of the circle for clear, toggle erase/draw, and change pen size)</h4>
+	    </div>
+	    <br>
 	    
 	    <p>Username:<input name="user" type="text"></p>
 	    
@@ -52,11 +61,7 @@
 
 	    <p>Confirm Password:<input name="confirm" type="password"></p>
 	    <input id="hiddenpic" type="hidden" name="pic" visible="hidden">
-	    
-	    <div style="text-align:center;">
-	      <canvas id="doodle" data-processing-sources="/static/ps/doodle.pde"></canvas>
-	    </div>
-	    
+
 	    <footer>
 	      
 	      <ul class="actions">

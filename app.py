@@ -24,6 +24,8 @@ def home():
 #account pages
 @app.route("/<username>")
 def account(username):
+    if username == "admin":
+        return redirect(url_for("yourstories", page=1))
     if assertionStuff() is not None:
         return assertionStuff()
     try:
@@ -44,7 +46,29 @@ def account(username):
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
     accountPic = dbUtils.getUserPic(accountId)
     return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username)
-    
+
+
+#search results
+@app.route("/search", methods=['POST'])
+def search():
+    if assertionStuff() is not None:
+        return assertionStuff()
+    if request.method=="POST":
+        query = request.form.get("query")
+    else:
+        return redirect(url_for("yourstories", page=1))
+    contributed = getSearchResults(query)
+    numposts = len(contributed)
+    contributed = contributed[::-1] #reverse first 5 chrono order
+    posts = []
+    for i in range( len(contributed) ):
+        posts.append(dbUtils.getStoryInfo( contributed[i] ))
+        posts[i]["create_ts"] = getFormattedDate( posts[i]["create_ts"] )
+        for j in range( len(posts[i]["extensions"]) ): #expand extensions
+            posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
+    accountPic = dbUtils.getUserPic(accountId)
+    return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username)
+
     
 #lands on this page after you click continue reading
 @app.route("/<username>/<postID>", methods=["GET","POST"])
@@ -87,29 +111,7 @@ def find(page):
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
             
     return render_template("multipleposts.html", postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
-                                                                                                
-'''#shows stories you did not contribute to based on user id
-@app.route("/find/<int:page>")
-def find(page):
-    if assertionStuff() is not None:
-        return assertionStuff()
-    user = session["user"]
-    userID = dbUtils.getUserID(user)
-    notContributed = dbUtils.getNonContributedStories(userID)
-    numposts = len(notContributed)
-    if page >=0 and page <= numposts / 5 + 1:
-        notContributed = notContributed[::-1][5 * (page-1):5 * page] #reverse first 5 chrono order
-    else:
-        return redirect(url_for("find", page=1))
-    posts = []
-    for i in range( len(notContributed) ):
-        posts.append(dbUtils.getStoryInfo( notContributed[i] ))
-        posts[i]["create_ts"] = getFormattedDate( posts[i]["create_ts"] )
-        for j in range( len(posts[i]["extensions"]) ): #expand extensions
-            posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
 
-    return render_template("multipleposts.html", postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
-'''
 #view stories you created or contributed to
 # / page number starts on 1, loads 5 stories per page
 @app.route("/yourstories/<int:page>")
