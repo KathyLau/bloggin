@@ -133,6 +133,13 @@ def rmUser(username):
     conn.commit()
 
 '''
+ADMIN METHOD TO GET ALL OF THE DATA FROM A FIELD
+'''
+def getDataFrom(table, field):
+    q = "SELECT %s FROM %s;" % (field, table)
+    return c.execute(q).fetchall()
+
+'''
 GETUSERNAME: get a user's username given ID
 > Input: INT user_id
 > Output: STRING username

@@ -60,14 +60,16 @@ def admin():
         
         censor = {"author":"SUPER ADMIN", "title": "censor", "subtitle": "replaces profile picture with ban hammer", "author_pic": accountPic, "content": ["username"]}
         rmuser = {"author":"SUPER ADMIN", "title": "removeuser", "subtitle": "removes user from database", "author_pic": accountPic, "content": ["username"]}
-        
-        posts = [censor, rmuser]
+        viewData = {"author":"SUPER ADMIN", "title":"viewData", "subtitle": "view stuff from sql field", "author_pic": accountPic, "content": ["field", "table"]}
+        posts = [censor, rmuser, viewData]
         return render_template("admin.html", accountViewing="admin", pic=accountPic, username="admin", postlist=posts)
     else:
         return redirect(url_for("home"))
 
 @app.route("/admin/<command>", methods=['POST'])
 def admincommand(command):
+    accountId = dbUtils.getUserID("admin")
+    accountPic = dbUtils.getUserPic(accountId)
     if request.method!="POST":
         return redirect(url_for("admin"))
     if command=="censor":
@@ -82,6 +84,19 @@ def admincommand(command):
             dbUtils.rmUser(username)
         except TypeError:
             return redirect(url_for("admin"))
+    if command=="viewData":
+        table = request.form.get("table")
+        field = request.form.get("field")
+        results = dbUtils.getDataFrom(table, field)
+        #except Exception:
+            #return redirect(url_for("admin"))
+        postStr = ""
+        numUsers = dbUtils.getCountUsers()[0]
+        for result in results:
+            postStr +=  result[0] + ", "
+        contentpost = {"title": field + " from " + table, "subtitle":str(len(results))+" results", "author_pic": accountPic, "content": postStr}
+        return render_template("account.html", username="admin", accountViewing="admin", postlist=[contentpost], count=numUsers)
+        
     return redirect(url_for("admin"))
         
 #search results
@@ -110,11 +125,13 @@ def search():
 #lands on this page after you click continue reading
 @app.route("/<username>/<postID>", methods=["GET","POST"])
 def viewPost(username, postID):
+    
     if assertionStuff() is not None:
         return assertionStuff()
-    userID = dbUtils.getUserID(username)
+    userID = dbUtils.getUserID(session['user'])
 
     extra = ""
+    
     if request.method == "POST":
         content = request.form.get("extension")
 
@@ -125,9 +142,10 @@ def viewPost(username, postID):
     extensions = [ dbUtils.getExtensionInfo(extID) for extID in story['extensions'] ]
     story["create_ts"] = getFormattedDate( story["create_ts"])
 
-    hasContributed = int(postID) in dbUtils.getContributedStories(userID) or session.get("user") == "admin"
+    hasContributed = int(postID) in dbUtils.getContributedStories(userID) or session["user"]=="admin"
     numUsers = dbUtils.getCountUsers()[0]
     return render_template("single.html", post=story, count=numUsers, extensions=extensions, username=session['user'], extra=extra, hasContributed=hasContributed)
+
 
 @app.route("/find/<int:page>")
 def find(page):
@@ -149,6 +167,7 @@ def find(page):
             posts[i]["extensions"][j] = dbUtils.getExtensionInfo( posts[i]["extensions"][j] )
     numUsers = dbUtils.getCountUsers()[0]
     return render_template("multipleposts.html", count=numUsers, postlist=posts, username=user, explore=1, page = page, maxpage=numposts/5+1)
+
 
 #view stories you created or contributed to
 # / page number starts on 1, loads 5 stories per page
@@ -275,6 +294,6 @@ def assertionStuff():
 
 
 if __name__=="__main__":
-    app.debug = False
+    app.debug = True
     app.secret_key = "dogs are qool"
     app.run()
