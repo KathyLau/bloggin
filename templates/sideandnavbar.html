@@ -22,10 +22,15 @@
 	<h1><a href="/">Story Builder</a></h1>
 	<nav class="links">
 	  <ul>
+	    {% if username == "admin" %}
+	    <li><a href="/admin">Admin</a></li>
+	    {% else %}
 	    <li><a href="/yourstories/1">Your Stories</a></li>
+	    {% endif %}
 	    <li><a href="/find/1">Explore</a></li>
+	    {% if username != "admin" %}
 	    <li><a href="/new">Create Story</a></li>
-      <li>   {{count}} users and counting </li>
+	    {% endif %}
 	  </ul>
 	</nav>
 	<nav class="main">
@@ -63,6 +68,7 @@
 	  <header>
 	    <h2>Storytime Fun Site</h2>
 	    <p>Write and share stories with your friends in real-time!</p>
+	    <p>{{count}} users and counting </p>
 	  </header>
 	</section>
 

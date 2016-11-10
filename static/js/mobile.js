@@ -1,5 +1,5 @@
 function checkMobile() {
-    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    var isMobile = screen.width <= 980;
     if (isMobile) {
 	navmenu = document.getElementById("navmenu")
 	navmenu.innerHTML = '<li class="menu"><a class="fa-bars" href="#menu">Menu</a></li>'

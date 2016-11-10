@@ -17,21 +17,23 @@ def getMaxPage():
 #root
 @app.route("/")
 def home():
-    if "user" in session:
+    if "user" in session and session.get("user") != "admin":
         return redirect(url_for("yourstories", page=1))
+    elif session.get("user") == "admin":
+        return redirect(url_for("admin"))
     return redirect(url_for("login"))
 
 #account pages
 @app.route("/<username>")
 def account(username):
-    if username == "admin":
-        return redirect(url_for("yourstories", page=1))
     if assertionStuff() is not None:
         return assertionStuff()
     try:
         accountId = dbUtils.getUserID(username)
     except Exception:
-        return redirect(url_for("yourstories", page=1))
+        return redirect(url_for("home"))
+    if username == "admin" and session["user"] != "admin":
+        return redirect(url_for("home"))
     #user = session["user"]
     #userID = dbUtils.getUserID(user) #get user id
     contributed = dbUtils.getContributedStories(accountId)
@@ -48,7 +50,40 @@ def account(username):
     numUsers = dbUtils.getCountUsers()[0]
     return render_template("account.html", postlist=posts, username=session['user'], pic=accountPic, accountViewing=username, count=numUsers)
 
+#admin page
+@app.route("/admin", methods=['GET'])
+def admin():
+    if request.method=='GET' and session.get("user") == "admin":
+        
+        accountId = dbUtils.getUserID("admin")
+        accountPic = dbUtils.getUserPic(accountId)
+        
+        censor = {"author":"SUPER ADMIN", "title": "censor", "subtitle": "replaces profile picture with ban hammer", "author_pic": accountPic, "content": ["username"]}
+        rmuser = {"author":"SUPER ADMIN", "title": "removeuser", "subtitle": "removes user from database", "author_pic": accountPic, "content": ["username"]}
+        
+        posts = [censor, rmuser]
+        return render_template("admin.html", accountViewing="admin", pic=accountPic, username="admin", postlist=posts)
+    else:
+        return redirect(url_for("home"))
 
+@app.route("/admin/<command>", methods=['POST'])
+def admincommand(command):
+    if request.method!="POST":
+        return redirect(url_for("admin"))
+    if command=="censor":
+        username = request.form.get("username")
+        try:
+            dbUtils.censor(username)
+        except TypeError:
+            return redirect(url_for("admin"))
+    if command=="removeuser":
+        username = request.form.get("username")
+        try:
+            dbUtils.rmUser(username)
+        except TypeError:
+            return redirect(url_for("admin"))
+    return redirect(url_for("admin"))
+        
 #search results
 @app.route("/search", methods=['POST'])
 def search():
@@ -90,7 +125,7 @@ def viewPost(username, postID):
     extensions = [ dbUtils.getExtensionInfo(extID) for extID in story['extensions'] ]
     story["create_ts"] = getFormattedDate( story["create_ts"])
 
-    hasContributed = int(postID) in dbUtils.getContributedStories(userID)
+    hasContributed = int(postID) in dbUtils.getContributedStories(userID) or session.get("user") == "admin"
     numUsers = dbUtils.getCountUsers()[0]
     return render_template("single.html", post=story, count=numUsers, extensions=extensions, username=session['user'], extra=extra, hasContributed=hasContributed)
 
@@ -188,7 +223,8 @@ def reg():
 #Logout - pop user out of session bye
 @app.route("/logout")
 def logout():
-    session.pop("user")
+    if "user" in session:
+        session.pop("user")
     return redirect("/")
 
 #create a new story page

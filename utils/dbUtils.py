@@ -104,8 +104,8 @@ CENSOR FUNCTION FOR GROSS PICS
 >Input: STRING USERNAME
 '''
 def censor(username):
-    conn = sqlite3.connect("data/tabular.db")
-    c = conn.cursor()
+    '''conn = sqlite3.connect("data/tabular.db")
+    c = conn.cursor()'''
     user_id = int(c.execute("SELECT id FROM user WHERE username=?", (username,)).fetchone()[0])
     q = "SELECT pfp FROM user WHERE username=\"admin\""
     banImage = c.execute(q).fetchone()[0]
@@ -116,6 +116,20 @@ def censor(username):
     for poisonedstory in stories:
         q = "UPDATE story SET author_pic = ? WHERE id = ?"
         c.execute(q, (banImage, poisonedstory[0]))
+    conn.commit()
+
+'''
+RMUSER: remove a user from database
+> Input: String username
+'''
+def rmUser(username):
+    user_id = int(c.execute("SELECT id FROM user WHERE username=?", (username,)).fetchone()[0])
+    q = "DELETE FROM user WHERE lower(id) = lower(?)"
+    c.execute(q, (user_id,))
+    q = "DELETE FROM story WHERE lower(user_id) = lower(?)"
+    c.execute(q, (user_id,))
+    q = "DELETE FROM extension WHERE lower(user_id) = lower(?)"
+    c.execute(q, (user_id,))
     conn.commit()
 
 '''
