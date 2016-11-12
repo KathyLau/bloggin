@@ -1,6 +1,9 @@
 # Collab Story Builder
 
 by Kathy, Daniel, Kelly, William (Period 8)
+
+Check out our link on danwashere.ddns.net
+
 ### Cool Features
 * User profile picture customization
 * Pagination
