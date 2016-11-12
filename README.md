@@ -7,6 +7,7 @@ Check out our link on danwashere.ddns.net
 ### Cool Features
 * User profile picture customization
 * Pagination
+* Search bar for stories
 
 ### General
 
